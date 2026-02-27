@@ -12,6 +12,7 @@ import '../manager/manager_request_page.dart';
 import '../schedule/cubit/schedule_cubit.dart';
 import 'cubit/main_cubit.dart';
 import 'cubit/main_state.dart';
+import '../../../resource/app_strings.dart';
 
 @RoutePage()
 class MainPage extends StatelessWidget {
@@ -82,22 +83,22 @@ class MainPage extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
-            label: 'Home',
+            label: AppStrings.home,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.admin_panel_settings_outlined),
             activeIcon: Icon(Icons.admin_panel_settings),
-            label: 'Manage',
+            label: AppStrings.manage,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month_outlined),
             activeIcon: Icon(Icons.calendar_month),
-            label: 'Schedule',
+            label: AppStrings.schedule,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            label: AppStrings.profile,
           ),
         ];
       case UserRole.HR:
@@ -105,22 +106,22 @@ class MainPage extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
-            label: 'Home',
+            label: AppStrings.home,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.visibility_outlined),
             activeIcon: Icon(Icons.visibility),
-            label: 'View All',
+            label: AppStrings.viewAll,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month_outlined),
             activeIcon: Icon(Icons.calendar_month),
-            label: 'Schedule',
+            label: AppStrings.schedule,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            label: AppStrings.profile,
           ),
         ];
       case UserRole.INTERN:
@@ -129,22 +130,22 @@ class MainPage extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
-            label: 'Home',
+            label: AppStrings.home,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month_outlined),
             activeIcon: Icon(Icons.calendar_month),
-            label: 'Schedule',
+            label: AppStrings.schedule,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment_outlined),
             activeIcon: Icon(Icons.assignment),
-            label: 'Status',
+            label: AppStrings.status,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            label: AppStrings.profile,
           ),
         ];
     }

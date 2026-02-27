@@ -9,6 +9,7 @@ import '../../router/app_router.gr.dart';
 import '../main/cubit/main_cubit.dart';
 import 'cubit/home_cubit.dart';
 import 'cubit/home_state.dart';
+import '../../../resource/app_strings.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -21,7 +22,7 @@ class HomePage extends StatelessWidget {
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Schedule Overview'),
+              title: const Text(AppStrings.scheduleOverview),
               actions: [
                 Stack(
                   children: [
@@ -76,7 +77,7 @@ class HomePage extends StatelessWidget {
                         vertical: 10,
                       ),
                       child: Text(
-                        'Recent Updates',
+                        AppStrings.recentUpdates,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -86,7 +87,7 @@ class HomePage extends StatelessWidget {
                     const Center(
                       child: Padding(
                         padding: EdgeInsets.all(40),
-                        child: Text('No recent schedule requests'),
+                        child: Text(AppStrings.noRecentUpdates),
                       ),
                     ),
                   ],
@@ -135,7 +136,7 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Welcome back,',
+            AppStrings.welcomeBack,
             style: TextStyle(
               color: Color(0xFF444444), // High contrast grey
               fontSize: 16,
@@ -195,7 +196,7 @@ class HomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isLeave ? 'ON LEAVE TODAY' : 'WORKING TODAY',
+                    isLeave ? AppStrings.onLeaveToday : AppStrings.workingToday,
                     style: TextStyle(
                       color: color.shade700,
                       fontWeight: FontWeight.w900,
@@ -232,7 +233,7 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Quick Actions',
+            AppStrings.quickActions,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -242,21 +243,21 @@ class HomePage extends StatelessWidget {
                 ? [
                     _buildActionItem(
                       context,
-                      'Requests',
+                      AppStrings.requests,
                       Icons.pending_actions,
                       Colors.orange,
                       tabIndex: 1,
                     ),
                     _buildActionItem(
                       context,
-                      'Schedule',
+                      AppStrings.schedule,
                       Icons.calendar_month,
                       Colors.blue,
                       tabIndex: 2,
                     ),
                     _buildActionItem(
                       context,
-                      'Profile',
+                      AppStrings.profile,
                       Icons.person,
                       Colors.green,
                       tabIndex: 3,
@@ -265,21 +266,21 @@ class HomePage extends StatelessWidget {
                 : [
                     _buildActionItem(
                       context,
-                      'Schedule',
+                      AppStrings.schedule,
                       Icons.calendar_today,
                       Colors.blue,
                       tabIndex: 1,
                     ),
                     _buildActionItem(
                       context,
-                      'Absence',
+                      AppStrings.absence,
                       Icons.event_busy,
                       Colors.red,
                       tabIndex: 1, // Also Schedule tab
                     ),
                     _buildActionItem(
                       context,
-                      'Profile',
+                      AppStrings.profile,
                       Icons.person,
                       Colors.green,
                       tabIndex: 3,
@@ -332,12 +333,16 @@ class HomePage extends StatelessWidget {
       child: Row(
         children: [
           _buildStatCard(
-            'Pending',
+            AppStrings.pendingRequests,
             state.pendingCount.toString(),
             Colors.orange,
           ),
           const SizedBox(width: 16),
-          _buildStatCard('Total', state.totalCount.toString(), Colors.blue),
+          _buildStatCard(
+            AppStrings.totalRequests,
+            state.totalCount.toString(),
+            Colors.blue,
+          ),
         ],
       ),
     );

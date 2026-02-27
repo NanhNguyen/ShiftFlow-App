@@ -6,6 +6,7 @@ import '../../router/app_router.gr.dart';
 import '../../../data/constant/enums.dart';
 import 'cubit/profile_cubit.dart';
 import 'cubit/profile_state.dart';
+import '../../../resource/app_strings.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -19,7 +20,7 @@ class ProfilePage extends StatelessWidget {
           if (state.status == BaseStatus.success) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Action successful! Please login again.'),
+                content: Text(AppStrings.actionSuccessful),
                 backgroundColor: Colors.green,
               ),
             );
@@ -27,7 +28,7 @@ class ProfilePage extends StatelessWidget {
           } else if (state.status == BaseStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage ?? 'An error occurred'),
+                content: Text(state.errorMessage ?? AppStrings.anErrorOccurred),
                 backgroundColor: Colors.red,
               ),
             );
@@ -36,7 +37,7 @@ class ProfilePage extends StatelessWidget {
         builder: (context, state) {
           final user = state.user;
           return Scaffold(
-            appBar: AppBar(title: const Text('My Profile')),
+            appBar: AppBar(title: const Text(AppStrings.myProfile)),
             body: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -80,14 +81,14 @@ class ProfilePage extends StatelessWidget {
                   _buildOptionTile(
                     context,
                     icon: Icons.lock_outline,
-                    title: 'Change Password',
+                    title: AppStrings.changePassword,
                     onTap: () => _showChangePasswordDialog(context),
                   ),
                   const Divider(),
                   _buildOptionTile(
                     context,
                     icon: Icons.logout,
-                    title: 'Logout',
+                    title: AppStrings.logout,
                     isDestructive: true,
                     onTap: () => context.read<ProfileCubit>().logout(),
                   ),
@@ -108,7 +109,7 @@ class ProfilePage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change Password'),
+        title: const Text(AppStrings.changePassword),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -116,7 +117,7 @@ class ProfilePage extends StatelessWidget {
               controller: passwordController,
               obscureText: true,
               decoration: const InputDecoration(
-                labelText: 'New Password',
+                labelText: AppStrings.newPassword,
                 hintText: 'Minimum 6 characters',
               ),
             ),
@@ -124,33 +125,35 @@ class ProfilePage extends StatelessWidget {
             TextField(
               controller: confirmController,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Confirm Password'),
+              decoration: const InputDecoration(
+                labelText: AppStrings.confirmPassword,
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text(AppStrings.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               if (passwordController.text.length < 6) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Password too short')),
+                  const SnackBar(content: Text(AppStrings.passwordTooShort)),
                 );
                 return;
               }
               if (passwordController.text != confirmController.text) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Passwords do not match')),
+                  const SnackBar(content: Text(AppStrings.passwordsDoNotMatch)),
                 );
                 return;
               }
               Navigator.pop(context);
               cubit.changePassword(passwordController.text);
             },
-            child: const Text('Update'),
+            child: const Text(AppStrings.update),
           ),
         ],
       ),

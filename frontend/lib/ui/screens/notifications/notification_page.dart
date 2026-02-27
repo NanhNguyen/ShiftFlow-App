@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'cubit/notification_cubit.dart';
 import 'cubit/notification_state.dart';
+import '../../../../resource/app_strings.dart';
 import '../../../../data/constant/enums.dart';
 import '../../di/di_config.dart';
 
@@ -16,7 +17,10 @@ class NotificationPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => getIt<NotificationCubit>()..loadNotifications(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Notifications'), elevation: 0),
+        appBar: AppBar(
+          title: const Text(AppStrings.notifications),
+          elevation: 0,
+        ),
         body: BlocBuilder<NotificationCubit, NotificationState>(
           builder: (context, state) {
             if (state.status == BaseStatus.loading) {
@@ -35,7 +39,7 @@ class NotificationPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'No notifications yet',
+                      AppStrings.noNotifications,
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                   ],

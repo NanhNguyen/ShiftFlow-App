@@ -8,6 +8,7 @@ import '../../../../data/constant/enums.dart';
 import '../../../../data/service/auth_service.dart';
 import 'cubit/manager_requests_cubit.dart';
 import 'cubit/manager_requests_state.dart';
+import '../../../resource/app_strings.dart';
 
 @RoutePage()
 class ManagerRequestPage extends StatelessWidget {
@@ -26,15 +27,17 @@ class ManagerRequestPage extends StatelessWidget {
         child: Scaffold(
           appBar: AppBar(
             title: Text(
-              isManager ? 'Manage Requests' : 'All Requests (View Only)',
+              isManager
+                  ? AppStrings.manageRequests
+                  : AppStrings.allRequestsView,
             ),
             bottom: isManager
                 ? null
-                : const TabBar(
+                : TabBar(
                     tabs: [
-                      Tab(text: 'PENDING'),
-                      Tab(text: 'APPROVED'),
-                      Tab(text: 'REJECTED'),
+                      Tab(text: AppStrings.pending.toUpperCase()),
+                      Tab(text: AppStrings.approved.toUpperCase()),
+                      Tab(text: AppStrings.rejected.toUpperCase()),
                     ],
                   ),
           ),
@@ -59,7 +62,7 @@ class ManagerRequestPage extends StatelessWidget {
         .toList();
 
     if (pendingRequests.isEmpty) {
-      return const Center(child: Text('No pending requests.'));
+      return const Center(child: Text(AppStrings.noPendingRequests));
     }
 
     final displayItems = pendingRequests.groupByGroupId();
@@ -119,7 +122,7 @@ class ManagerRequestPage extends StatelessWidget {
           child: Container(
             height: MediaQuery.of(context).size.height * 0.6,
             alignment: Alignment.center,
-            child: const Text('No requests in this category.'),
+            child: const Text(AppStrings.noRequestsCategory),
           ),
         ),
       );
@@ -190,7 +193,7 @@ class ManagerRequestPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        first.userMetadata?['name'] ?? 'Employee',
+                        first.userMetadata?['name'] ?? AppStrings.employee,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -198,8 +201,8 @@ class ManagerRequestPage extends StatelessWidget {
                       ),
                       Text(
                         isRecurring
-                            ? 'Batch Recurring Request'
-                            : 'Batch Individual Days',
+                            ? AppStrings.batchRecurringRequest
+                            : AppStrings.batchIndividualDays,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,
@@ -218,7 +221,7 @@ class ManagerRequestPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${group.length} items • ${first.status.name}',
+                    '${group.length} ${AppStrings.itemsCount} • ${first.status.name}',
                     style: TextStyle(
                       color: statusColor,
                       fontWeight: FontWeight.bold,
@@ -230,13 +233,13 @@ class ManagerRequestPage extends StatelessWidget {
             ),
             const Divider(height: 24),
             Text(
-              'Shift: ${first.shift}',
+              '${AppStrings.shift}: ${first.shift}',
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             if (isRecurring) ...[
               Text(
-                'Duration: ${DateFormat('dd/MM').format(first.startDate)} - ${DateFormat('dd/MM').format(first.endDate)}',
+                '${AppStrings.duration}: ${DateFormat('dd/MM').format(first.startDate)} - ${DateFormat('dd/MM').format(first.endDate)}',
                 style: const TextStyle(fontSize: 13),
               ),
               const SizedBox(height: 4),
@@ -256,7 +259,7 @@ class ManagerRequestPage extends StatelessWidget {
                     .toList(),
               ),
             ] else ...[
-              const Text('Dates:', style: TextStyle(fontSize: 13)),
+              const Text(AppStrings.datesLabel, style: TextStyle(fontSize: 13)),
               const SizedBox(height: 4),
               Wrap(
                 spacing: 4,
@@ -284,7 +287,7 @@ class ManagerRequestPage extends StatelessWidget {
             if (first.description != null && first.description!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                'Note: ${first.description}',
+                '${AppStrings.note}: ${first.description}',
                 style: TextStyle(
                   fontStyle: FontStyle.italic,
                   color: Colors.grey.shade700,
@@ -308,7 +311,7 @@ class ManagerRequestPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text('Reject All'),
+                      child: const Text(AppStrings.rejectAll),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -324,7 +327,7 @@ class ManagerRequestPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text('Approve All'),
+                      child: const Text(AppStrings.approveAll),
                     ),
                   ),
                 ],
@@ -385,9 +388,11 @@ class ManagerRequestPage extends StatelessWidget {
               ],
             ),
             const Divider(height: 24),
-            Text('Shift: ${req.shift}'),
-            Text('Weekday: ${req.weekday ?? ''}'),
-            Text('Date: ${DateFormat('yyyy-MM-dd').format(req.startDate)}'),
+            Text('${AppStrings.shift}: ${req.shift}'),
+            Text('${AppStrings.weekday}: ${req.weekday ?? ''}'),
+            Text(
+              '${AppStrings.datesLabel} ${DateFormat('yyyy-MM-dd').format(req.startDate)}',
+            ),
             if (showActions && req.status == RequestStatus.PENDING) ...[
               const SizedBox(height: 16),
               Row(
@@ -401,7 +406,7 @@ class ManagerRequestPage extends StatelessWidget {
                         foregroundColor: Colors.red,
                         side: const BorderSide(color: Colors.red),
                       ),
-                      child: const Text('Reject'),
+                      child: const Text(AppStrings.reject),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -414,7 +419,7 @@ class ManagerRequestPage extends StatelessWidget {
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
                       ),
-                      child: const Text('Approve'),
+                      child: const Text(AppStrings.approve),
                     ),
                   ),
                 ],

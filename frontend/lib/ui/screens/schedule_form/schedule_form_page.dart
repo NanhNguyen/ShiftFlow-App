@@ -7,6 +7,7 @@ import '../../di/di_config.dart';
 import '../../../data/constant/enums.dart';
 import 'cubit/schedule_form_cubit.dart';
 import 'cubit/schedule_form_state.dart';
+import '../../../resource/app_strings.dart';
 
 @RoutePage()
 class ScheduleFormPage extends StatelessWidget {
@@ -21,7 +22,7 @@ class ScheduleFormPage extends StatelessWidget {
           if (state.status == BaseStatus.success) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Request submitted successfully!'),
+                content: Text(AppStrings.requestSubmitted),
                 backgroundColor: Colors.green,
               ),
             );
@@ -29,7 +30,9 @@ class ScheduleFormPage extends StatelessWidget {
           } else if (state.status == BaseStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.errorMessage ?? 'Submission failed'),
+                content: Text(
+                  state.errorMessage ?? AppStrings.submissionFailed,
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -42,7 +45,11 @@ class ScheduleFormPage extends StatelessWidget {
 
           return Scaffold(
             appBar: AppBar(
-              title: Text(isLeave ? 'Request Leave' : 'Register Schedule'),
+              title: Text(
+                isLeave
+                    ? AppStrings.requestLeave
+                    : AppStrings.registerScheduleTitle,
+              ),
               backgroundColor: color,
               foregroundColor: Colors.white,
             ),
@@ -63,7 +70,7 @@ class ScheduleFormPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle('Request Mode'),
+                    _buildSectionTitle(AppStrings.requestMode),
                     Center(
                       child: SegmentedButton<ScheduleType>(
                         style: SegmentedButton.styleFrom(
@@ -73,12 +80,12 @@ class ScheduleFormPage extends StatelessWidget {
                         segments: const [
                           ButtonSegment(
                             value: ScheduleType.WORK,
-                            label: Text('Work'),
+                            label: Text(AppStrings.work),
                             icon: Icon(Icons.work_rounded),
                           ),
                           ButtonSegment(
                             value: ScheduleType.LEAVE,
-                            label: Text('Leave'),
+                            label: Text(AppStrings.leave),
                             icon: Icon(Icons.beach_access_rounded),
                           ),
                         ],
@@ -104,11 +111,11 @@ class ScheduleFormPage extends StatelessWidget {
                         ),
                         child: SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Recurring Mode'),
+                          title: const Text(AppStrings.recurringMode),
                           subtitle: Text(
                             isRecurring
-                                ? 'Weekly repeating schedule'
-                                : 'Specific individual days',
+                                ? AppStrings.weeklyRepeating
+                                : AppStrings.specificDays,
                             style: const TextStyle(fontSize: 12),
                           ),
                           activeColor: color,
@@ -120,7 +127,9 @@ class ScheduleFormPage extends StatelessWidget {
                       ),
                     const SizedBox(height: 32),
                     _buildSectionTitle(
-                      isRecurring ? 'Recurring Duration' : 'Choose Days',
+                      isRecurring
+                          ? AppStrings.recurringDuration
+                          : AppStrings.chooseDays,
                     ),
                     if (isRecurring)
                       Row(
@@ -128,7 +137,7 @@ class ScheduleFormPage extends StatelessWidget {
                           Expanded(
                             child: _buildDateCard(
                               context,
-                              label: 'START',
+                              label: AppStrings.start,
                               date: state.startDate ?? DateTime.now(),
                               color: color,
                               onTap: () => _showScrollingDatePicker(
@@ -150,7 +159,7 @@ class ScheduleFormPage extends StatelessWidget {
                           Expanded(
                             child: _buildDateCard(
                               context,
-                              label: 'UNTIL',
+                              label: AppStrings.until,
                               date: state.endDate ?? DateTime.now(),
                               color: color,
                               onTap: () => _showScrollingDatePicker(
@@ -169,29 +178,33 @@ class ScheduleFormPage extends StatelessWidget {
                       _buildMultiDatePicker(context, state, color),
                     const SizedBox(height: 32),
                     if (isRecurring) ...[
-                      _buildSectionTitle('Repeat On'),
+                      _buildSectionTitle(AppStrings.repeatOn),
                       _buildWeekdaySelector(context, state, color),
                       const SizedBox(height: 32),
                     ],
-                    _buildSectionTitle('Shift'),
+                    _buildSectionTitle(AppStrings.shift),
                     _buildGlassDropdown(
-                      label: 'Working Shift',
+                      label: AppStrings.workingShift,
                       value: state.shift,
-                      items: ['MORNING', 'AFTERNOON', 'ALL_DAY'],
+                      items: [
+                        AppStrings.morning,
+                        AppStrings.afternoon,
+                        AppStrings.allDay,
+                      ],
                       onChanged: (v) => context
                           .read<ScheduleFormCubit>()
                           .updateField(shift: v),
                     ),
                     const SizedBox(height: 32),
-                    _buildSectionTitle('Details'),
+                    _buildSectionTitle(AppStrings.descriptionLabel),
                     TextField(
                       onChanged: (v) => context
                           .read<ScheduleFormCubit>()
                           .updateField(description: v),
                       maxLines: 2,
                       decoration: InputDecoration(
-                        hintText: 'Add notes or specific reasons...',
-                        labelText: 'Description',
+                        hintText: AppStrings.addNotes,
+                        labelText: AppStrings.descriptionLabel,
                         prefixIcon: const Icon(Icons.notes_rounded),
                         filled: true,
                         fillColor: Colors.white,
@@ -233,8 +246,8 @@ class ScheduleFormPage extends StatelessWidget {
                               )
                             : Text(
                                 isLeave
-                                    ? 'Submit Leave Request'
-                                    : 'Confirm Registration',
+                                    ? AppStrings.submitLeave
+                                    : AppStrings.confirmRegistration,
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -369,7 +382,7 @@ class ScheduleFormPage extends StatelessWidget {
                 Icon(Icons.add_circle_outline_rounded, color: color),
                 const SizedBox(width: 8),
                 Text(
-                  'Add Date',
+                  AppStrings.addDate,
                   style: TextStyle(color: color, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -457,15 +470,15 @@ class ScheduleFormPage extends StatelessWidget {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
+                      child: const Text(AppStrings.cancel),
                     ),
                     const Text(
-                      'Select Date',
+                      AppStrings.selectDate,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Done'),
+                      child: const Text(AppStrings.done),
                     ),
                   ],
                 ),

@@ -6,6 +6,7 @@ import '../../router/app_router.gr.dart';
 import '../../../data/constant/enums.dart';
 import 'cubit/login_cubit.dart';
 import 'cubit/login_state.dart';
+import '../../../resource/app_strings.dart';
 
 @RoutePage()
 class LoginPage extends StatefulWidget {
@@ -29,7 +30,9 @@ class _LoginPageState extends State<LoginPage> {
             context.router.replace(const MainRoute());
           } else if (state.status == BaseStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage ?? 'Login failed')),
+              SnackBar(
+                content: Text(state.errorMessage ?? AppStrings.loginFailed),
+              ),
             );
           }
         },
@@ -64,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 16),
                           const Text(
-                            'Shiftly',
+                            AppStrings.appName,
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -75,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
                           TextField(
                             controller: _emailController,
                             decoration: InputDecoration(
-                              labelText: 'Email',
+                              labelText: AppStrings.email,
                               prefixIcon: const Icon(Icons.email_outlined),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -87,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                             controller: _passwordController,
                             obscureText: state.obscurePassword,
                             decoration: InputDecoration(
-                              labelText: 'Password',
+                              labelText: AppStrings.password,
                               prefixIcon: const Icon(Icons.lock_outline),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -127,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                                       color: Colors.white,
                                     )
                                   : const Text(
-                                      'Login',
+                                      AppStrings.login,
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,

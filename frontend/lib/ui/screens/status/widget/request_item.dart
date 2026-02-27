@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../../../data/constant/enums.dart';
 import '../../../../data/model/schedule_request_model.dart';
 import 'status_badge.dart';
+import '../../../../resource/app_strings.dart';
 
 class RequestItem extends StatelessWidget {
   final ScheduleRequestModel request;
@@ -37,7 +38,8 @@ class RequestItem extends StatelessWidget {
                   vertical: 8,
                 ),
                 title: Text(
-                  request.description ?? (isLeave ? 'Leave' : 'Work'),
+                  request.description ??
+                      (isLeave ? AppStrings.leave : AppStrings.work),
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 16,
@@ -48,7 +50,7 @@ class RequestItem extends StatelessWidget {
                   children: [
                     const SizedBox(height: 4),
                     Text(
-                      'Shift: ${request.shift}',
+                      '${AppStrings.shift}: ${request.shift}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,

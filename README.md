@@ -1,38 +1,38 @@
-# Shiftly - Schedule Management App
+# Shiftly - Ứng Dụng Quản Lý Lịch Trình
 
-Shiftly is a comprehensive schedule management application designed for interns and managers. It allows easy registration of work shifts and leave requests, with a streamlined approval process for managers.
+Shiftly là một ứng dụng quản lý lịch trình toàn diện dành cho thực tập sinh và quản lý. Ứng dụng cho phép đăng ký ca làm việc và yêu cầu nghỉ phép một cách dễ dàng, cùng với quy trình phê duyệt tinh gọn cho quản lý.
 
-## Project Structure
+## Cấu Trúc Dự Án
 
-This is a monorepo containing both the backend and frontend:
+Đây là một monorepo chứa cả backend và frontend:
 
-- `/backend`: NestJS application using Mongoose (MongoDB).
-- `/frontend`: Flutter application for Android, iOS, and Web.
+- `/backend`: Ứng dụng NestJS sử dụng Mongoose (MongoDB).
+- `/frontend`: Ứng dụng Flutter cho Android, iOS và Web.
 
-## Deployment on Render
+## Triển Khai trên Render
 
-To deploy this project on Render:
+Để triển khai dự án này trên Render:
 
 ### Backend (NestJS)
-1. Create a new **Web Service**.
-2. Connect this repository.
-3. Set **Root Directory** to `backend`.
-4. Set **Build Command** to `npm install && npm run build`.
-5. Set **Start Command** to `node dist/main`.
-6. Add environment variables (e.g., `MONGO_URI`, `JWT_SECRET`).
+1. Tạo một **Web Service** mới.
+2. Kết nối với repository này.
+3. Đặt **Root Directory** thành `backend`.
+4. Đặt **Build Command** thành `npm install && npm run build`.
+5. Đặt **Start Command** thành `node dist/main`.
+6. Thêm các biến môi trường (ví dụ: `MONGO_URI`, `JWT_SECRET`).
 
-### Frontend (Flutter Web - optional)
-1. Create a new **Static Site**.
-2. Connect this repository.
-3. Set **Root Directory** to `frontend`.
-4. Set **Build Command** to `flutter build web --release`.
-5. Set **Publish Directory** to `build/web`.
+### Frontend (Flutter Web - tùy chọn)
+1. Tạo một **Static Site** mới.
+2. Kết nối với repository này.
+3. Đặt **Root Directory** thành `frontend`.
+4. Đặt **Build Command** thành `flutter build web --release`.
+5. Đặt **Publish Directory** thành `build/web`.
 
-## Key Features
-- **Batch Grouping**: Multiple day requests are grouped into single manageable items.
-- **Unique Staff Count**: Managers can see the exact number of people scheduled per day.
-- **Role-Based Access**: Specialized interfaces for Interns, Managers, and HR.
-- **Notifications**: Real-time notifications for schedule status updates and new requests.
+## Các Tính Năng Chính
+- **Gom nhóm theo lô**: Các yêu cầu cho nhiều ngày được nhóm lại thành các mục dễ quản lý.
+- **Số lượng nhân viên duy nhất**: Quản lý có thể xem chính xác số lượng người được xếp lịch theo từng ngày.
+- **Truy cập dựa trên vai trò**: Giao diện chuyên biệt cho Thực tập sinh, Quản lý và Nhân sự.
+- **Thông báo**: Thông báo thời gian thực về cập nhật trạng thái lịch trình và các yêu cầu mới.
 
-## Rebranding
-The app was recently rebranded from "Schedule Pro" to **Shiftly**.
+## Tái cấu trúc thương hiệu
+Ứng dụng gần đây đã được đổi tên từ "Schedule Pro" thành **Shiftly**.

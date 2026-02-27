@@ -5,6 +5,7 @@ import '../../../../data/model/schedule_request_model.dart';
 import 'cubit/status_cubit.dart';
 import 'cubit/status_state.dart';
 import 'widget/request_item.dart';
+import '../../../resource/app_strings.dart';
 
 class StatusPage extends StatelessWidget {
   const StatusPage({super.key});
@@ -20,7 +21,7 @@ class StatusPage extends StatelessWidget {
             backgroundColor: Colors.blue,
             elevation: 0,
             title: const Text(
-              'My Request Status',
+              AppStrings.myRequestStatus,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -32,10 +33,10 @@ class StatusPage extends StatelessWidget {
               indicatorColor: Colors.white,
               indicatorWeight: 3,
               labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-              tabs: const [
-                Tab(text: 'PENDING'),
-                Tab(text: 'APPROVED'),
-                Tab(text: 'REJECTED'),
+              tabs: [
+                Tab(text: AppStrings.pending.toUpperCase()),
+                Tab(text: AppStrings.approved.toUpperCase()),
+                Tab(text: AppStrings.rejected.toUpperCase()),
               ],
             ),
           ),
@@ -78,7 +79,7 @@ class StatusPage extends StatelessWidget {
           child: Container(
             height: MediaQuery.of(context).size.height * 0.6,
             alignment: Alignment.center,
-            child: const Text('No requests found in this category.'),
+            child: const Text(AppStrings.noRequestsFound),
           ),
         ),
       );
@@ -134,10 +135,12 @@ class StatusPage extends StatelessWidget {
       ),
       child: ExpansionTile(
         title: Text(
-          first.description ?? 'Batch Request',
+          first.description ?? AppStrings.batchRequest,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        subtitle: Text('${group.length} items • ${first.status.name}'),
+        subtitle: Text(
+          '${group.length} ${AppStrings.itemsCount} • ${first.status.name}',
+        ),
         leading: Icon(
           first.isRecurring ? Icons.repeat : Icons.event_note,
           color: color,
@@ -172,19 +175,22 @@ class StatusPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to remove this request?'),
+        title: const Text(AppStrings.confirmDelete),
+        content: const Text(AppStrings.deleteMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text(AppStrings.cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               onConfirm();
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text(
+              AppStrings.delete,
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),

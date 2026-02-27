@@ -9,6 +9,7 @@ import '../../../../data/service/auth_service.dart';
 import 'cubit/schedule_cubit.dart';
 import 'cubit/schedule_state.dart';
 import '../../router/app_router.gr.dart';
+import '../../../resource/app_strings.dart';
 import 'package:auto_route/auto_route.dart';
 
 class SchedulePage extends StatefulWidget {
@@ -40,7 +41,11 @@ class _SchedulePageState extends State<SchedulePage> {
       create: (context) => getIt<ScheduleCubit>()..loadSchedules(_userRole),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(isManagerOrHR ? 'Staff Schedule' : 'My Work Schedule'),
+          title: Text(
+            isManagerOrHR
+                ? AppStrings.staffSchedule
+                : AppStrings.myWorkSchedule,
+          ),
           elevation: 0,
           actions: [
             Builder(
@@ -257,9 +262,9 @@ class _SchedulePageState extends State<SchedulePage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _legendItem(Colors.blue, 'Working'),
+          _legendItem(Colors.blue, AppStrings.working),
           const SizedBox(width: 24),
-          _legendItem(Colors.red, 'On Leave'),
+          _legendItem(Colors.red, AppStrings.onLeave),
         ],
       ),
     );
@@ -306,7 +311,7 @@ class _SchedulePageState extends State<SchedulePage> {
         if (working > 0)
           _indicatorPill(
             Icons.group_rounded,
-            '$working Staff',
+            '$working ${AppStrings.staffCount}',
             Colors.blue,
             isWeek: true,
           ),
@@ -314,7 +319,7 @@ class _SchedulePageState extends State<SchedulePage> {
         if (leave > 0)
           _indicatorPill(
             Icons.person_off_rounded,
-            '$leave Off',
+            '$leave ${AppStrings.offCount}',
             Colors.red,
             isWeek: true,
           ),
@@ -483,7 +488,7 @@ class _SchedulePageState extends State<SchedulePage> {
             Icon(Icons.event_busy, size: 48, color: Colors.grey.shade400),
             const SizedBox(height: 8),
             Text(
-              'No schedules for ${DateFormat('EEEE, MMM d').format(_selectedDay ?? _focusedDay)}',
+              '${AppStrings.noSchedulesFor} ${DateFormat('EEEE, MMM d').format(_selectedDay ?? _focusedDay)}',
               style: TextStyle(color: Colors.grey.shade600),
             ),
           ],
@@ -534,8 +539,8 @@ class _SchedulePageState extends State<SchedulePage> {
             ),
             title: Text(
               isManagerOrHR
-                  ? (req.userMetadata?['name'] ?? 'Staff')
-                  : (isLeave ? 'Personal Leave' : 'My Shift'),
+                  ? (req.userMetadata?['name'] ?? AppStrings.staff)
+                  : (isLeave ? AppStrings.personalLeave : AppStrings.myShift),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Column(
@@ -567,7 +572,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       Icon(Icons.repeat, size: 12, color: Colors.grey.shade600),
                       const SizedBox(width: 2),
                       Text(
-                        'Recurring',
+                        AppStrings.recurring,
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.grey.shade600,
@@ -596,24 +601,25 @@ class _SchedulePageState extends State<SchedulePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(req.userMetadata?['name'] ?? 'Details'),
+        title: Text(req.userMetadata?['name'] ?? AppStrings.details),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Type: ${req.type.name}'),
-            Text('Shift: ${req.shift}'),
-            Text('Status: ${req.status.name}'),
-            if (req.description != null) Text('Note: ${req.description}'),
+            Text('${AppStrings.type}: ${req.type.name}'),
+            Text('${AppStrings.shift}: ${req.shift}'),
+            Text('${AppStrings.requestStatus}: ${req.status.name}'),
+            if (req.description != null)
+              Text('${AppStrings.note}: ${req.description}'),
             Text(
-              'Registered At: ${DateFormat('yyyy-MM-dd HH:mm').format(req.createdAt)}',
+              '${AppStrings.registeredAt}: ${DateFormat('yyyy-MM-dd HH:mm').format(req.createdAt)}',
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: const Text(AppStrings.close),
           ),
         ],
       ),
