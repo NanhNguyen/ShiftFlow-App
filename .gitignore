@@ -1,0 +1,8 @@
+# General
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Root level ignores
+# (handled by subdirectories mostly)
