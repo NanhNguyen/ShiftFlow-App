@@ -32,4 +32,10 @@ export class NotificationsService {
             .findByIdAndUpdate(id, { is_read: true }, { new: true })
             .exec();
     }
+
+    async markAllAsRead(userId: string): Promise<void> {
+        await this.notificationModel
+            .updateMany({ user_id: userId as any, is_read: false }, { is_read: true })
+            .exec();
+    }
 }

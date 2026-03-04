@@ -9,7 +9,12 @@ export class NotificationsController {
 
     @Get()
     async findAll(@Request() req) {
-        return this.notificationsService.findAllByUser(req.user.userId);
+        return this.notificationsService.findAllByUser(req.user._id);
+    }
+
+    @Patch('read-all')
+    async markAllAsRead(@Request() req) {
+        return this.notificationsService.markAllAsRead(req.user._id);
     }
 
     @Patch(':id/read')
