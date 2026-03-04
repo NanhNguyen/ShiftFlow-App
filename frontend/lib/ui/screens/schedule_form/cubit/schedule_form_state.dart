@@ -12,9 +12,9 @@ class ScheduleFormState with _$ScheduleFormState {
     DateTime? endDate,
     @Default([]) List<DateTime> selectedDates,
     @Default(['MONDAY']) List<String> selectedWeekdays,
-    @Default('MORNING') String shift,
+    @Default('SÁNG') String shift,
     @Default(false) bool isRecurring,
     @Default('') String description,
-    @Default(ScheduleType.WORK) ScheduleType type,
+    @Default(ScheduleType.LEAVE) ScheduleType type,
   }) = _ScheduleFormState;
 }

@@ -8,15 +8,20 @@ import '../../../data/constant/enums.dart';
 import 'cubit/schedule_form_cubit.dart';
 import 'cubit/schedule_form_state.dart';
 import '../../../resource/app_strings.dart';
+import '../home/cubit/home_cubit.dart';
 
 @RoutePage()
 class ScheduleFormPage extends StatelessWidget {
-  const ScheduleFormPage({super.key});
+  final bool isInitialRecurring;
+
+  const ScheduleFormPage({super.key, this.isInitialRecurring = false});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<ScheduleFormCubit>(),
+      create: (context) =>
+          getIt<ScheduleFormCubit>()
+            ..setInitialMode(isRecurring: isInitialRecurring),
       child: BlocConsumer<ScheduleFormCubit, ScheduleFormState>(
         listener: (context, state) {
           if (state.status == BaseStatus.success) {
@@ -26,6 +31,8 @@ class ScheduleFormPage extends StatelessWidget {
                 backgroundColor: Colors.green,
               ),
             );
+            // Refresh home data so badge & pending count update
+            getIt<HomeCubit>().loadData();
             context.router.maybePop(true);
           } else if (state.status == BaseStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -39,16 +46,13 @@ class ScheduleFormPage extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          final isLeave = state.type == ScheduleType.LEAVE;
-          final color = isLeave ? Colors.red.shade700 : Colors.blue.shade700;
-          final isRecurring = state.isRecurring && !isLeave;
+          final color = Colors.blue.shade700; // Consistent blue
+          final isRecurring = state.isRecurring;
 
           return Scaffold(
             appBar: AppBar(
               title: Text(
-                isLeave
-                    ? AppStrings.requestLeave
-                    : AppStrings.registerScheduleTitle,
+                isRecurring ? AppStrings.recurringLeave : AppStrings.adhocLeave,
               ),
               backgroundColor: color,
               foregroundColor: Colors.white,
@@ -70,61 +74,8 @@ class ScheduleFormPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle(AppStrings.requestMode),
-                    Center(
-                      child: SegmentedButton<ScheduleType>(
-                        style: SegmentedButton.styleFrom(
-                          selectedBackgroundColor: color,
-                          selectedForegroundColor: Colors.white,
-                        ),
-                        segments: const [
-                          ButtonSegment(
-                            value: ScheduleType.WORK,
-                            label: Text(AppStrings.work),
-                            icon: Icon(Icons.work_rounded),
-                          ),
-                          ButtonSegment(
-                            value: ScheduleType.LEAVE,
-                            label: Text(AppStrings.leave),
-                            icon: Icon(Icons.beach_access_rounded),
-                          ),
-                        ],
-                        selected: {state.type},
-                        onSelectionChanged: (Set<ScheduleType> newSelection) {
-                          context.read<ScheduleFormCubit>().updateField(
-                            type: newSelection.first,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    if (!isLeave)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text(AppStrings.recurringMode),
-                          subtitle: Text(
-                            isRecurring
-                                ? AppStrings.weeklyRepeating
-                                : AppStrings.specificDays,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          activeColor: color,
-                          value: state.isRecurring,
-                          onChanged: (v) => context
-                              .read<ScheduleFormCubit>()
-                              .updateField(isRecurring: v),
-                        ),
-                      ),
+                    const SizedBox(height: 8),
+                    const SizedBox.shrink(),
                     const SizedBox(height: 32),
                     _buildSectionTitle(
                       isRecurring
@@ -202,12 +153,19 @@ class ScheduleFormPage extends StatelessWidget {
                           .read<ScheduleFormCubit>()
                           .updateField(description: v),
                       maxLines: 2,
+                      textAlignVertical: TextAlignVertical.center,
                       decoration: InputDecoration(
                         hintText: AppStrings.addNotes,
-                        labelText: AppStrings.descriptionLabel,
-                        prefixIcon: const Icon(Icons.notes_rounded),
+                        prefixIcon: const Padding(
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          child: Icon(Icons.notes_rounded),
+                        ),
                         filled: true,
                         fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,
@@ -245,11 +203,11 @@ class ScheduleFormPage extends StatelessWidget {
                                 ),
                               )
                             : Text(
-                                isLeave
+                                isRecurring
                                     ? AppStrings.submitLeave
                                     : AppStrings.confirmRegistration,
                                 style: const TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 20, // Increased from 18
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -272,7 +230,7 @@ class ScheduleFormPage extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 16,
           fontWeight: FontWeight.w900,
           color: Colors.grey.shade600,
           letterSpacing: 1.1,
@@ -286,23 +244,32 @@ class ScheduleFormPage extends StatelessWidget {
     ScheduleFormState state,
     Color color,
   ) {
-    final weekdays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
+    // Keys are DB values (English), labels are display text (Vietnamese)
+    final weekdayOptions = {
+      'MONDAY': 'Th 2',
+      'TUESDAY': 'Th 3',
+      'WEDNESDAY': 'Th 4',
+      'THURSDAY': 'Th 5',
+      'FRIDAY': 'Th 6',
+    };
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: weekdays.map((day) {
-        final isSelected = state.selectedWeekdays.contains(day);
+      children: weekdayOptions.entries.map((entry) {
+        final dbKey = entry.key;
+        final label = entry.value;
+        final isSelected = state.selectedWeekdays.contains(dbKey);
         return FilterChip(
-          label: Text(day.substring(0, 3)),
+          label: Text(label),
           selected: isSelected,
           onSelected: (_) =>
-              context.read<ScheduleFormCubit>().toggleWeekday(day),
+              context.read<ScheduleFormCubit>().toggleWeekday(dbKey),
           selectedColor: color,
           checkmarkColor: Colors.white,
           labelStyle: TextStyle(
             color: isSelected ? Colors.white : Colors.black87,
             fontWeight: FontWeight.bold,
-            fontSize: 12,
+            fontSize: 16,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -415,7 +382,7 @@ class ScheduleFormPage extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey.shade500,
               ),
@@ -431,7 +398,7 @@ class ScheduleFormPage extends StatelessWidget {
             ),
             Text(
               DateFormat('yyyy').format(date),
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -510,10 +477,9 @@ class ScheduleFormPage extends StatelessWidget {
     return DropdownButtonFormField<String>(
       value: value,
       decoration: InputDecoration(
-        labelText: label,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
-          vertical: 16,
+          vertical: 18,
         ),
         filled: true,
         fillColor: Colors.white,

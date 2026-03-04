@@ -14,9 +14,14 @@ class ScheduleFormCubit extends BaseCubit<ScheduleFormState> {
           startDate: DateTime.now(),
           endDate: DateTime.now().add(const Duration(days: 7)),
           selectedDates: [],
-          selectedWeekdays: [],
+          selectedWeekdays: ['MONDAY'],
+          type: ScheduleType.LEAVE,
         ),
       );
+
+  void setInitialMode({required bool isRecurring}) {
+    emit(state.copyWith(isRecurring: isRecurring));
+  }
 
   void updateField({
     DateTime? startDate,
@@ -76,20 +81,20 @@ class ScheduleFormCubit extends BaseCubit<ScheduleFormState> {
   }
 
   Future<void> submit() async {
-    final isRecurring = state.isRecurring && state.type == ScheduleType.WORK;
+    final isRecurring = state.isRecurring;
 
     if (isRecurring) {
       if (state.startDate == null || state.endDate == null) {
-        setError('Please select start and end dates for recurring schedule');
+        setError('Vui lòng chọn ngày bắt đầu và kết thúc');
         return;
       }
       if (state.selectedWeekdays.isEmpty) {
-        setError('Please select at least one day of the week');
+        setError('Vui lòng chọn ít nhất một thứ trong tuần');
         return;
       }
     } else {
       if (state.selectedDates.isEmpty) {
-        setError('Please select at least one date');
+        setError('Vui lòng chọn ít nhất một ngày nghỉ');
         return;
       }
     }

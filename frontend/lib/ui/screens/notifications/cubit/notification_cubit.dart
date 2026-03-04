@@ -4,7 +4,7 @@ import '../../../../data/constant/enums.dart';
 import '../../../../data/repo/notification_repo.dart';
 import 'notification_state.dart';
 
-@injectable
+@lazySingleton
 class NotificationCubit extends Cubit<NotificationState> {
   final NotificationRepo _notificationRepo;
 
@@ -39,6 +39,21 @@ class NotificationCubit extends Cubit<NotificationState> {
       emit(state.copyWith(notifications: updatedNotifications));
     } catch (e) {
       // Silently fail or handle error
+    }
+  }
+
+  /// Mark ALL notifications as read immediately in local state,
+  /// then sync with backend. Called when user opens the notification page.
+  Future<void> markAllAsRead() async {
+    // Update local state immediately so badge disappears and banner won't re-show
+    final updated = state.notifications
+        .map((n) => n.copyWith(isRead: true))
+        .toList();
+    emit(state.copyWith(notifications: updated));
+    try {
+      await _notificationRepo.markAllAsRead();
+    } catch (_) {
+      // Silently fail — local state already updated
     }
   }
 }

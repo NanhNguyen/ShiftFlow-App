@@ -16,101 +16,156 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<HomeCubit>()..loadData(),
-      child: BlocBuilder<HomeCubit, HomeState>(
-        builder: (context, state) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text(AppStrings.scheduleOverview),
-              actions: [
-                Stack(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.notifications_none),
-                      onPressed: () =>
-                          context.pushRoute(const NotificationRoute()),
-                    ),
-                    if (state.unreadNotificationCount > 0)
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
-                          ),
-                          child: Text(
-                            '${state.unreadNotificationCount}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text(AppStrings.scheduleOverview),
+            actions: [
+              Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none, size: 32),
+                    onPressed: () =>
+                        context.pushRoute(const NotificationRoute()),
+                  ),
+                  Builder(
+                    builder: (context) {
+                      final role =
+                          getIt<AuthService>().currentUser?.role ??
+                          UserRole.INTERN;
+                      final isManagerOrHR =
+                          role == UserRole.MANAGER || role == UserRole.HR;
+                      final totalBadge =
+                          state.unreadNotificationCount +
+                          (isManagerOrHR ? state.pendingCount : 0);
+
+                      if (totalBadge > 0) {
+                        return Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            textAlign: TextAlign.center,
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              '$totalBadge',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                        ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(width: 10),
+            ],
+          ),
+          body: RefreshIndicator(
+            onRefresh: () => context.read<HomeCubit>().loadData(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(state.user?.name ?? 'User'),
+                  _buildTodayStatus(state.todaySchedule),
+                  _buildQuickActions(context),
+                  _buildQuickStats(state),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    child: Text(
+                      AppStrings.recentUpdates,
+                      style: TextStyle(
+                        fontSize: 22, // Increased from 18
+                        fontWeight: FontWeight.bold,
                       ),
-                  ],
-                ),
-              ],
-            ),
-            body: RefreshIndicator(
-              onRefresh: () => context.read<HomeCubit>().loadData(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(state.user?.name ?? 'User'),
-                    _buildTodayStatus(state.todaySchedule),
-                    _buildQuickActions(context),
-                    _buildQuickStats(state),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
+                    ),
+                  ),
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(50),
                       child: Text(
-                        AppStrings.recentUpdates,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        AppStrings.noRecentUpdates,
+                        style: TextStyle(fontSize: 18),
                       ),
                     ),
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(40),
-                        child: Text(AppStrings.noRecentUpdates),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            floatingActionButton: () {
-              final role =
-                  getIt<AuthService>().currentUser?.role ?? UserRole.INTERN;
-              if (role == UserRole.INTERN || role == UserRole.EMPLOYEE) {
-                return FloatingActionButton(
-                  onPressed: () =>
-                      context.router.push(const ScheduleFormRoute()),
-                  backgroundColor: Colors.blue.shade700,
-                  foregroundColor: Colors.white,
-                  child: const Icon(Icons.add),
-                );
-              }
-              return null;
-            }(),
-          );
-        },
-      ),
+          ),
+          floatingActionButton: () {
+            final role =
+                getIt<AuthService>().currentUser?.role ?? UserRole.INTERN;
+            if (role == UserRole.INTERN || role == UserRole.EMPLOYEE) {
+              return FloatingActionButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                    ),
+                    builder: (context) => Container(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(
+                              Icons.repeat,
+                              color: Colors.blue,
+                            ),
+                            title: const Text(AppStrings.recurringLeave),
+                            onTap: () {
+                              Navigator.pop(context);
+                              context.router.push(
+                                ScheduleFormRoute(isInitialRecurring: true),
+                              );
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(
+                              Icons.event,
+                              color: Colors.orange,
+                            ),
+                            title: const Text(AppStrings.adhocLeave),
+                            onTap: () {
+                              Navigator.pop(context);
+                              context.router.push(
+                                ScheduleFormRoute(isInitialRecurring: false),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                backgroundColor: Colors.blue.shade700,
+                foregroundColor: Colors.white,
+                child: const Icon(Icons.add),
+              );
+            }
+            return null;
+          }(),
+        );
+      },
     );
   }
 
@@ -138,17 +193,17 @@ class HomePage extends StatelessWidget {
           const Text(
             AppStrings.welcomeBack,
             style: TextStyle(
-              color: Color(0xFF444444), // High contrast grey
-              fontSize: 16,
+              color: Color(0xFF444444),
+              fontSize: 18, // Increased from 16
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12), // Increased spacing
           Text(
             name,
             style: const TextStyle(
-              color: Colors.black, // Pure black for max contrast
-              fontSize: 28,
+              color: Colors.black,
+              fontSize: 36, // Increased from 32
               fontWeight: FontWeight.w900,
               letterSpacing: -0.5,
             ),
@@ -162,7 +217,7 @@ class HomePage extends StatelessWidget {
     if (todaySchedule == null) return const SizedBox.shrink();
 
     final isLeave = todaySchedule.type == ScheduleType.LEAVE;
-    final color = isLeave ? Colors.red : Colors.green;
+    final color = Colors.blue; // Consistent blue
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -200,17 +255,17 @@ class HomePage extends StatelessWidget {
                     style: TextStyle(
                       color: color.shade700,
                       fontWeight: FontWeight.w900,
-                      fontSize: 12,
+                      fontSize: 14, // Increased from 12
                       letterSpacing: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     isLeave
-                        ? 'Personal Leave'
-                        : 'Shift: ${todaySchedule.shift}',
+                        ? AppStrings.personalLeave
+                        : 'Ca: ${todaySchedule.shift}',
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 22, // Increased from 20
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -234,9 +289,9 @@ class HomePage extends StatelessWidget {
         children: [
           const Text(
             AppStrings.quickActions,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: isManagerOrHR
@@ -266,17 +321,21 @@ class HomePage extends StatelessWidget {
                 : [
                     _buildActionItem(
                       context,
-                      AppStrings.schedule,
-                      Icons.calendar_today,
+                      AppStrings.recurringLeave,
+                      Icons.repeat,
                       Colors.blue,
-                      tabIndex: 1,
+                      onTap: () => context.router.push(
+                        ScheduleFormRoute(isInitialRecurring: true),
+                      ),
                     ),
                     _buildActionItem(
                       context,
-                      AppStrings.absence,
-                      Icons.event_busy,
-                      Colors.red,
-                      tabIndex: 1, // Also Schedule tab
+                      AppStrings.adhocLeave,
+                      Icons.event_note,
+                      Colors.orange,
+                      onTap: () => context.router.push(
+                        ScheduleFormRoute(isInitialRecurring: false),
+                      ),
                     ),
                     _buildActionItem(
                       context,
@@ -298,30 +357,33 @@ class HomePage extends StatelessWidget {
     IconData icon,
     Color color, {
     int? tabIndex,
+    VoidCallback? onTap,
   }) {
     return Column(
       children: [
         InkWell(
-          onTap: () {
-            if (tabIndex != null) {
-              context.read<MainCubit>().setIndex(tabIndex);
-            }
-          },
+          onTap:
+              onTap ??
+              () {
+                if (tabIndex != null) {
+                  context.read<MainCubit>().setIndex(tabIndex);
+                }
+              },
           borderRadius: BorderRadius.circular(16),
           child: Container(
-            width: 64,
-            height: 64,
+            width: 72, // Increased from 64
+            height: 72,
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(18),
             ),
-            child: Icon(icon, color: color, size: 28),
+            child: Icon(icon, color: color, size: 34), // Increased from 28
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -362,12 +424,21 @@ class HomePage extends StatelessWidget {
             Text(
               value,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 32, // Increased from 24
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
             ),
-            Text(label, style: TextStyle(color: color.withOpacity(0.8))),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: color.withOpacity(0.8),
+                fontSize: 16, // Increased
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),

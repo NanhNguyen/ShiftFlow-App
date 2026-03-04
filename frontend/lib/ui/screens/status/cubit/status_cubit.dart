@@ -2,6 +2,8 @@ import 'package:injectable/injectable.dart';
 import '../../../cubit/base_cubit.dart';
 import '../../../../data/constant/enums.dart';
 import '../../../../data/repo/schedule_request_repo.dart';
+import '../../../di/di_config.dart';
+import '../../home/cubit/home_cubit.dart';
 import 'status_state.dart';
 
 @injectable
@@ -24,6 +26,7 @@ class StatusCubit extends BaseCubit<StatusState> {
     try {
       await _scheduleRepo.deleteSchedule(id);
       await loadRequests();
+      getIt<HomeCubit>().loadData();
     } catch (e) {
       setError(e.toString());
     }
@@ -33,6 +36,7 @@ class StatusCubit extends BaseCubit<StatusState> {
     try {
       await _scheduleRepo.deleteBatchSchedules(groupId);
       await loadRequests();
+      getIt<HomeCubit>().loadData();
     } catch (e) {
       setError(e.toString());
     }

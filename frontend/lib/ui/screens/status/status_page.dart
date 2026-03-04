@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../di/di_config.dart';
+import '../../../../data/constant/enums.dart';
 import '../../../../data/model/schedule_request_model.dart';
+import '../../../../data/service/auth_service.dart';
 import 'cubit/status_cubit.dart';
 import 'cubit/status_state.dart';
 import 'widget/request_item.dart';
@@ -32,7 +34,14 @@ class StatusPage extends StatelessWidget {
               unselectedLabelColor: Colors.white.withOpacity(0.6),
               indicatorColor: Colors.white,
               indicatorWeight: 3,
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ), // Increased
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ), // Increased
               tabs: [
                 Tab(text: AppStrings.pending.toUpperCase()),
                 Tab(text: AppStrings.approved.toUpperCase()),
@@ -127,6 +136,13 @@ class StatusPage extends StatelessWidget {
         ? Colors.orange
         : (first.status == RequestStatus.APPROVED ? Colors.green : Colors.red);
 
+    // For interns, hide the count since they only have their own schedules
+    final role = getIt<AuthService>().currentUser?.role ?? UserRole.INTERN;
+    final isIntern = role == UserRole.INTERN || role == UserRole.EMPLOYEE;
+    final subtitle = isIntern
+        ? first.status.displayName
+        : '${group.length} ${AppStrings.itemsCount} • ${first.status.displayName}';
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
@@ -136,18 +152,27 @@ class StatusPage extends StatelessWidget {
       child: ExpansionTile(
         title: Text(
           first.description ?? AppStrings.batchRequest,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ), // Increased from 16
         ),
         subtitle: Text(
-          '${group.length} ${AppStrings.itemsCount} • ${first.status.name}',
-        ),
+          subtitle,
+          style: const TextStyle(fontSize: 16),
+        ), // Increased from 14
         leading: Icon(
           first.isRecurring ? Icons.repeat : Icons.event_note,
-          color: color,
+          color: Colors.blue,
+          size: 28, // Increased
         ),
         trailing: isPending
             ? IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: Colors.red,
+                  size: 28,
+                ), // Increased
                 onPressed: () => _confirmDelete(context, () {
                   context.read<StatusCubit>().deleteBatchRequests(
                     first.groupId!,

@@ -20,6 +20,7 @@ mixin _$ManagerRequestsState {
   BaseStatus get status => throw _privateConstructorUsedError;
   String? get errorMessage => throw _privateConstructorUsedError;
   List<ScheduleRequestModel> get requests => throw _privateConstructorUsedError;
+  String? get actionResult => throw _privateConstructorUsedError;
 
   /// Create a copy of ManagerRequestsState
   /// with the given fields replaced by the non-null parameter values.
@@ -39,6 +40,7 @@ abstract class $ManagerRequestsStateCopyWith<$Res> {
     BaseStatus status,
     String? errorMessage,
     List<ScheduleRequestModel> requests,
+    String? actionResult,
   });
 }
 
@@ -63,6 +65,7 @@ class _$ManagerRequestsStateCopyWithImpl<
     Object? status = null,
     Object? errorMessage = freezed,
     Object? requests = null,
+    Object? actionResult = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -78,6 +81,10 @@ class _$ManagerRequestsStateCopyWithImpl<
                 ? _value.requests
                 : requests // ignore: cast_nullable_to_non_nullable
                       as List<ScheduleRequestModel>,
+            actionResult: freezed == actionResult
+                ? _value.actionResult
+                : actionResult // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -97,6 +104,7 @@ abstract class _$$ManagerRequestsStateImplCopyWith<$Res>
     BaseStatus status,
     String? errorMessage,
     List<ScheduleRequestModel> requests,
+    String? actionResult,
   });
 }
 
@@ -117,6 +125,7 @@ class __$$ManagerRequestsStateImplCopyWithImpl<$Res>
     Object? status = null,
     Object? errorMessage = freezed,
     Object? requests = null,
+    Object? actionResult = freezed,
   }) {
     return _then(
       _$ManagerRequestsStateImpl(
@@ -132,6 +141,10 @@ class __$$ManagerRequestsStateImplCopyWithImpl<$Res>
             ? _value._requests
             : requests // ignore: cast_nullable_to_non_nullable
                   as List<ScheduleRequestModel>,
+        actionResult: freezed == actionResult
+            ? _value.actionResult
+            : actionResult // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -144,6 +157,7 @@ class _$ManagerRequestsStateImpl implements _ManagerRequestsState {
     this.status = BaseStatus.initial,
     this.errorMessage,
     final List<ScheduleRequestModel> requests = const [],
+    this.actionResult,
   }) : _requests = requests;
 
   @override
@@ -161,8 +175,11 @@ class _$ManagerRequestsStateImpl implements _ManagerRequestsState {
   }
 
   @override
+  final String? actionResult;
+
+  @override
   String toString() {
-    return 'ManagerRequestsState(status: $status, errorMessage: $errorMessage, requests: $requests)';
+    return 'ManagerRequestsState(status: $status, errorMessage: $errorMessage, requests: $requests, actionResult: $actionResult)';
   }
 
   @override
@@ -173,7 +190,9 @@ class _$ManagerRequestsStateImpl implements _ManagerRequestsState {
             (identical(other.status, status) || other.status == status) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage) &&
-            const DeepCollectionEquality().equals(other._requests, _requests));
+            const DeepCollectionEquality().equals(other._requests, _requests) &&
+            (identical(other.actionResult, actionResult) ||
+                other.actionResult == actionResult));
   }
 
   @override
@@ -182,6 +201,7 @@ class _$ManagerRequestsStateImpl implements _ManagerRequestsState {
     status,
     errorMessage,
     const DeepCollectionEquality().hash(_requests),
+    actionResult,
   );
 
   /// Create a copy of ManagerRequestsState
@@ -202,6 +222,7 @@ abstract class _ManagerRequestsState implements ManagerRequestsState {
     final BaseStatus status,
     final String? errorMessage,
     final List<ScheduleRequestModel> requests,
+    final String? actionResult,
   }) = _$ManagerRequestsStateImpl;
 
   @override
@@ -210,6 +231,8 @@ abstract class _ManagerRequestsState implements ManagerRequestsState {
   String? get errorMessage;
   @override
   List<ScheduleRequestModel> get requests;
+  @override
+  String? get actionResult;
 
   /// Create a copy of ManagerRequestsState
   /// with the given fields replaced by the non-null parameter values.

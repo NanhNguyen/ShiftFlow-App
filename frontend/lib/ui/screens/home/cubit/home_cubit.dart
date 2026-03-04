@@ -7,7 +7,7 @@ import '../../../../data/repo/schedule_request_repo.dart';
 import '../../../../data/model/schedule_request_model.dart';
 import 'home_state.dart';
 
-@injectable
+@lazySingleton
 class HomeCubit extends BaseCubit<HomeState> {
   final ScheduleRequestRepo _scheduleRepo;
   final NotificationRepo _notificationRepo;
@@ -36,7 +36,7 @@ class HomeCubit extends BaseCubit<HomeState> {
         allSchedules = results[2] as List<ScheduleRequestModel>;
       }
 
-      // If manager, pendingCount should reflect ALL pending requests
+      // Manager/HR: count ALL pending; Intern: count their own pending
       final schedulesForCount = isManagerOrHR ? allSchedules : mySchedules;
       final pendingList = schedulesForCount
           .where((s) => s.status == RequestStatus.PENDING)

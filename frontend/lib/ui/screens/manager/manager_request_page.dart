@@ -8,6 +8,7 @@ import '../../../../data/constant/enums.dart';
 import '../../../../data/service/auth_service.dart';
 import 'cubit/manager_requests_cubit.dart';
 import 'cubit/manager_requests_state.dart';
+import '../main/cubit/main_cubit.dart';
 import '../../../resource/app_strings.dart';
 
 @RoutePage()
@@ -41,7 +42,61 @@ class ManagerRequestPage extends StatelessWidget {
                     ],
                   ),
           ),
-          body: BlocBuilder<ManagerRequestsCubit, ManagerRequestsState>(
+          body: BlocConsumer<ManagerRequestsCubit, ManagerRequestsState>(
+            listenWhen: (prev, curr) =>
+                curr.actionResult != null &&
+                curr.actionResult != prev.actionResult,
+            listener: (context, state) {
+              final isApproved = state.actionResult == 'APPROVED';
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      Icon(
+                        isApproved ? Icons.check_circle : Icons.cancel,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        isApproved
+                            ? 'Đã duyệt yêu cầu thành công!'
+                            : 'Đã từ chối yêu cầu.',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: isApproved
+                      ? Colors.green.shade600
+                      : Colors.red.shade600,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  duration: const Duration(seconds: 3),
+                  action: isApproved
+                      ? SnackBarAction(
+                          label: 'Xem lịch',
+                          textColor: Colors.white,
+                          onPressed: () {
+                            context.read<MainCubit>().setIndex(2);
+                          },
+                        )
+                      : null,
+                ),
+              );
+              // Auto-navigate to schedule tab after approval
+              if (isApproved) {
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  if (context.mounted) {
+                    context.read<MainCubit>().setIndex(2);
+                  }
+                });
+              }
+            },
             builder: (context, state) {
               if (isManager) {
                 return _buildManagerView(context, state);
@@ -158,10 +213,7 @@ class ManagerRequestPage extends StatelessWidget {
   }) {
     final first = group.first;
     final isRecurring = first.isRecurring;
-    final color = first.type == ScheduleType.LEAVE ? Colors.red : Colors.blue;
-    final statusColor = first.status == RequestStatus.PENDING
-        ? Colors.orange
-        : (first.status == RequestStatus.APPROVED ? Colors.green : Colors.red);
+    final color = Colors.blue;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -209,24 +261,6 @@ class ManagerRequestPage extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '${group.length} ${AppStrings.itemsCount} • ${first.status.name}',
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                    ),
                   ),
                 ),
               ],
@@ -377,11 +411,11 @@ class ManagerRequestPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    req.status.name,
+                    req.status.displayName,
                     style: TextStyle(
                       color: statusColor,
                       fontWeight: FontWeight.bold,
-                      fontSize: 11,
+                      fontSize: 12,
                     ),
                   ),
                 ),

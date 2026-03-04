@@ -10,5 +10,6 @@ class ManagerRequestsState with _$ManagerRequestsState {
     @Default(BaseStatus.initial) BaseStatus status,
     String? errorMessage,
     @Default([]) List<ScheduleRequestModel> requests,
+    String? actionResult, // 'APPROVED' | 'REJECTED' | null
   }) = _ManagerRequestsState;
 }

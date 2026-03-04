@@ -2,7 +2,7 @@ import 'package:injectable/injectable.dart';
 import '../../../cubit/base_cubit.dart';
 import 'main_state.dart';
 
-@injectable
+@lazySingleton
 class MainCubit extends BaseCubit<MainState> {
   MainCubit() : super(const MainState());
 

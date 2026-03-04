@@ -235,10 +235,10 @@ class _$ScheduleFormStateImpl implements _ScheduleFormState {
     this.endDate,
     final List<DateTime> selectedDates = const [],
     final List<String> selectedWeekdays = const ['MONDAY'],
-    this.shift = 'MORNING',
+    this.shift = 'SÁNG',
     this.isRecurring = false,
     this.description = '',
-    this.type = ScheduleType.WORK,
+    this.type = ScheduleType.LEAVE,
   }) : _selectedDates = selectedDates,
        _selectedWeekdays = selectedWeekdays;
 

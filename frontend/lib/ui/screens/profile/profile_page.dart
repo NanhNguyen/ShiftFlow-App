@@ -43,21 +43,29 @@ class ProfilePage extends StatelessWidget {
               child: Column(
                 children: [
                   const CircleAvatar(
-                    radius: 50,
+                    radius: 60, // Increased
                     backgroundColor: Colors.blue,
-                    child: Icon(Icons.person, size: 50, color: Colors.white),
+                    child: Icon(
+                      Icons.person,
+                      size: 60,
+                      color: Colors.white,
+                    ), // Increased
                   ),
                   const SizedBox(height: 24),
                   Text(
                     user?.name ?? 'User Name',
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 28, // Increased from 24
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     user?.email ?? 'email@example.com',
-                    style: const TextStyle(color: Colors.grey),
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 18,
+                    ), // Increased 16->18
                   ),
                   const SizedBox(height: 12),
                   Container(
@@ -70,10 +78,11 @@ class ProfilePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      user?.role.toString().split('.').last ?? 'Role',
+                      user?.role.displayName ?? 'Role',
                       style: const TextStyle(
                         color: Colors.blue,
                         fontWeight: FontWeight.bold,
+                        fontSize: 16, // Increased from 14
                       ),
                     ),
                   ),
@@ -169,16 +178,23 @@ class ProfilePage extends StatelessWidget {
   }) {
     return ListTile(
       onTap: onTap,
-      leading: Icon(icon, color: isDestructive ? Colors.red : Colors.blue),
+      leading: Icon(
+        icon,
+        color: isDestructive ? Colors.red : Colors.blue,
+        size: 30,
+      ), // Increased
       title: Text(
         title,
         style: TextStyle(
           color: isDestructive ? Colors.red : Colors.black,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
+          fontSize: 18, // Increased
         ),
       ),
-      trailing: const Icon(Icons.chevron_right, size: 20),
-      contentPadding: EdgeInsets.zero,
+      trailing: const Icon(Icons.chevron_right, size: 24), // Increased
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 8,
+      ), // Increased spacing
     );
   }
 }

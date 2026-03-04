@@ -24,10 +24,13 @@ class ScheduleCubit extends BaseCubit<ScheduleState> {
         // Maybe only show approved on the final calendar?
         // Or keep all but display differently. Let's keep all for now.
       }
+      final approvedOnly = schedules
+          .where((s) => s.status == RequestStatus.APPROVED)
+          .toList();
       emit(
         state.copyWith(
           status: BaseStatus.success,
-          approvedSchedules: schedules,
+          approvedSchedules: approvedOnly,
         ),
       );
     } catch (e) {
