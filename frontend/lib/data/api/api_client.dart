@@ -13,7 +13,7 @@ class ApiClient {
     if (Platform.isAndroid) {
       return 'http://10.0.2.2:3000';
     }
-    return 'http://localhost:3000';
+    return 'https://shiftly-app-backend.onrender.com/';
   }
 
   ApiClient(this._tokenStorage) {

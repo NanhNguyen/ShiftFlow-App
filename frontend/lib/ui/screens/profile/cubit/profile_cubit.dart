@@ -31,7 +31,7 @@ class ProfileCubit extends BaseCubit<ProfileState> {
         getIt.resetLazySingleton<MainCubit>();
       }
 
-      setSuccess();
+      emit(state.copyWith(status: BaseStatus.success, user: null));
     } catch (e) {
       setError(e.toString());
     }
