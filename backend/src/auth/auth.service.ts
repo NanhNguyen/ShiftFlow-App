@@ -46,7 +46,7 @@ export class AuthService {
             const user = await this.usersService.findById(payload.sub);
 
             if (!user || user.refreshToken !== oldRefreshToken) {
-                throw new UnauthorizedException('Invalid refresh token');
+                throw new UnauthorizedException('Sai refresh token');
             }
 
             const newPayload = { email: user.email, sub: user._id, role: user.role };
@@ -54,7 +54,7 @@ export class AuthService {
 
             return { access_token };
         } catch (e) {
-            throw new UnauthorizedException('Session expired, please login again');
+            throw new UnauthorizedException('Phiên làm việc đã hết hạn, vui lòng đăng nhập lại');
         }
     }
 
