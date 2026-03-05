@@ -34,9 +34,15 @@ class ProfileCubit extends BaseCubit<ProfileState> {
     });
   }
 
-  Future<void> changePassword(String newPassword) async {
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
     safeCall(() async {
-      await _authService.changePassword(newPassword);
+      await _authService.changePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
       setSuccess();
     });
   }

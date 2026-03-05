@@ -240,22 +240,31 @@ class ProfilePage extends StatelessWidget {
 
   void _showChangePasswordDialog(BuildContext context) {
     final passwordController = TextEditingController();
+    final oldPasswordController = TextEditingController();
     final confirmController = TextEditingController();
     final cubit = context.read<ProfileCubit>();
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text(AppStrings.changePassword),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+              controller: oldPasswordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: AppStrings.currentPassword,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
               controller: passwordController,
               obscureText: true,
               decoration: const InputDecoration(
                 labelText: AppStrings.newPassword,
-                hintText: 'Minimum 6 characters',
+                hintText: 'Tối thiểu 6 ký tự',
               ),
             ),
             const SizedBox(height: 16),
@@ -275,6 +284,14 @@ class ProfilePage extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
+              if (oldPasswordController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Vui lòng nhập mật khẩu hiện tại'),
+                  ),
+                );
+                return;
+              }
               if (passwordController.text.length < 6) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text(AppStrings.passwordTooShort)),
@@ -288,7 +305,10 @@ class ProfilePage extends StatelessWidget {
                 return;
               }
               Navigator.pop(context);
-              cubit.changePassword(passwordController.text);
+              cubit.changePassword(
+                oldPassword: oldPasswordController.text,
+                newPassword: passwordController.text,
+              );
             },
             child: const Text(AppStrings.update),
           ),

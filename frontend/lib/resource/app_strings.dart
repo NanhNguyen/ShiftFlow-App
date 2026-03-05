@@ -20,6 +20,7 @@ class AppStrings {
   // Profile
   static const String myProfile = 'Hồ sơ của tôi';
   static const String changePassword = 'Đổi mật khẩu';
+  static const String currentPassword = 'Mật khẩu hiện tại';
   static const String logout = 'Đăng xuất';
   static const String newPassword = 'Mật khẩu mới';
   static const String confirmPassword = 'Xác nhận mật khẩu';

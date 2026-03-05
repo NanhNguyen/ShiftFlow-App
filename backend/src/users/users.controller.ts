@@ -11,9 +11,13 @@ export class UsersController {
 
     @UseGuards(JwtAuthGuard)
     @Post('change-password')
-    async changePassword(@Request() req, @Body('newPassword') newPassword: string) {
-        await this.usersService.changePassword(req.user.sub, newPassword);
-        return { message: 'Password changed successfully' };
+    async changePassword(
+        @Request() req,
+        @Body('oldPassword') oldPassword: string,
+        @Body('newPassword') newPassword: string
+    ) {
+        await this.usersService.changePassword(req.user.id, oldPassword, newPassword);
+        return { message: 'Đổi mật khẩu thành công' };
     }
 
     @UseGuards(JwtAuthGuard)

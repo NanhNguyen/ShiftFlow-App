@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserRole } from './schemas/user.schema';
@@ -74,7 +74,13 @@ export class UsersService {
         return user;
     }
 
-    async changePassword(id: string, newPassword: string): Promise<void> {
+    async changePassword(id: string, oldPassword: string, newPassword: string): Promise<void> {
+        const user = await this.userModel.findById(id).exec();
+        if (!user) throw new UnauthorizedException('Không tìm thấy người dùng');
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password_hash);
+        if (!isMatch) throw new UnauthorizedException('Mật khẩu cũ không chính xác');
+
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await this.userModel.findByIdAndUpdate(id, { password_hash: hashedPassword }).exec();
     }

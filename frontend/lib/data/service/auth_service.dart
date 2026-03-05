@@ -37,8 +37,14 @@ class AuthService {
     _currentUser = null;
   }
 
-  Future<void> changePassword(String newPassword) async {
-    await _authRepo.changePassword(newPassword);
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    await _authRepo.changePassword(
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+    );
   }
 
   Future<void> updateProfile({required String name}) async {

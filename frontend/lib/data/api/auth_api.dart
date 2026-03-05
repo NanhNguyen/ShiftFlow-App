@@ -22,10 +22,13 @@ class AuthApi {
     );
   }
 
-  Future<Response> changePassword(String newPassword) {
+  Future<Response> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) {
     return _apiClient.post(
       '/users/change-password',
-      data: {'newPassword': newPassword},
+      data: {'oldPassword': oldPassword, 'newPassword': newPassword},
     );
   }
 

@@ -48,8 +48,14 @@ class AuthRepoImpl implements AuthRepo {
   }
 
   @override
-  Future<void> changePassword(String newPassword) async {
-    await _authApi.changePassword(newPassword);
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    await _authApi.changePassword(
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+    );
   }
 
   @override
