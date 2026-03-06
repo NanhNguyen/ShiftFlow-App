@@ -67,38 +67,84 @@ class _MainPageState extends State<MainPage> {
                   .where((n) => !n.isRead)
                   .toList();
 
+              final isWideScreen = MediaQuery.of(context).size.width >= 800;
+              final currentNavItems = _userRole == UserRole.MANAGER
+                  ? _getManagerNavItemsWithBadge(context)
+                  : _navItems;
+
               return InAppNotificationOverlay(
                 notifications: notifState.notifications,
                 unreadCount: unreadNotifications.length,
                 child: Scaffold(
-                  body: IndexedStack(
-                    index: state.currentIndex,
-                    children: _pages,
+                  body: Row(
+                    children: [
+                      if (isWideScreen)
+                        NavigationRail(
+                          selectedIndex: state.currentIndex,
+                          onDestinationSelected: (index) {
+                            _mainCubit.setIndex(index);
+                            if ((_userRole == UserRole.INTERN && index == 1) ||
+                                (_userRole == UserRole.MANAGER && index == 2) ||
+                                (_userRole == UserRole.HR && index == 1)) {
+                              getIt<ScheduleCubit>().loadSchedules(_userRole);
+                            }
+                          },
+                          labelType: NavigationRailLabelType.all,
+                          selectedIconTheme: IconThemeData(
+                            color: _selectedColor,
+                            size: 30,
+                          ),
+                          unselectedIconTheme: const IconThemeData(
+                            color: Colors.grey,
+                            size: 30,
+                          ),
+                          selectedLabelTextStyle: TextStyle(
+                            color: _selectedColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          destinations: currentNavItems
+                              .map(
+                                (item) => NavigationRailDestination(
+                                  icon: item.icon,
+                                  selectedIcon: item.activeIcon,
+                                  label: Text(item.label ?? ''),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      if (isWideScreen)
+                        const VerticalDivider(thickness: 1, width: 1),
+                      Expanded(
+                        child: IndexedStack(
+                          index: state.currentIndex,
+                          children: _pages,
+                        ),
+                      ),
+                    ],
                   ),
-                  bottomNavigationBar: BottomNavigationBar(
-                    currentIndex: state.currentIndex,
-                    onTap: (index) {
-                      _mainCubit.setIndex(index);
-                      // Auto-refresh schedule when switching to Schedule tab
-                      if ((_userRole == UserRole.INTERN && index == 1) ||
-                          (_userRole == UserRole.MANAGER && index == 2) ||
-                          (_userRole == UserRole.HR && index == 1)) {
-                        getIt<ScheduleCubit>().loadSchedules(_userRole);
-                      }
-                    },
-                    type: BottomNavigationBarType.fixed,
-                    selectedItemColor: _selectedColor,
-                    unselectedItemColor: Colors.grey,
-                    iconSize: 30,
-                    selectedLabelStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    unselectedLabelStyle: const TextStyle(fontSize: 13),
-                    items: _userRole == UserRole.MANAGER
-                        ? _getManagerNavItemsWithBadge(context)
-                        : _navItems,
-                  ),
+                  bottomNavigationBar: isWideScreen
+                      ? null
+                      : BottomNavigationBar(
+                          currentIndex: state.currentIndex,
+                          onTap: (index) {
+                            _mainCubit.setIndex(index);
+                            if ((_userRole == UserRole.INTERN && index == 1) ||
+                                (_userRole == UserRole.MANAGER && index == 2) ||
+                                (_userRole == UserRole.HR && index == 1)) {
+                              getIt<ScheduleCubit>().loadSchedules(_userRole);
+                            }
+                          },
+                          type: BottomNavigationBarType.fixed,
+                          selectedItemColor: _selectedColor,
+                          unselectedItemColor: Colors.grey,
+                          iconSize: 30,
+                          selectedLabelStyle: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          unselectedLabelStyle: const TextStyle(fontSize: 13),
+                          items: currentNavItems,
+                        ),
                 ),
               );
             },
