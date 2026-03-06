@@ -30,20 +30,18 @@ class App extends StatelessWidget {
           onPrimary: Colors.white,
         ),
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.blue.shade700,
-          foregroundColor: Colors.white,
-          systemOverlayStyle: SystemUiOverlayStyle.light,
-          elevation: 0,
-          centerTitle: true,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black87,
+          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          elevation: 1,
+          shadowColor: Colors.black.withOpacity(0.1),
+          centerTitle: false,
           titleTextStyle: GoogleFonts.inter(
-            color: Colors.white,
-            fontSize: 24, // Increased from 22
+            color: Colors.black87,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
-          iconTheme: const IconThemeData(
-            color: Colors.white,
-            size: 28,
-          ), // Increased icon size
+          iconTheme: const IconThemeData(color: Colors.black87, size: 28),
         ),
         iconTheme: IconThemeData(color: Colors.blue.shade700, size: 26),
         textTheme: GoogleFonts.interTextTheme(

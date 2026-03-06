@@ -77,40 +77,93 @@ class _MainPageState extends State<MainPage> {
                 unreadCount: unreadNotifications.length,
                 child: Scaffold(
                   body: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (isWideScreen)
-                        NavigationRail(
-                          selectedIndex: state.currentIndex,
-                          onDestinationSelected: (index) {
-                            _mainCubit.setIndex(index);
-                            if ((_userRole == UserRole.INTERN && index == 1) ||
-                                (_userRole == UserRole.MANAGER && index == 2) ||
-                                (_userRole == UserRole.HR && index == 1)) {
-                              getIt<ScheduleCubit>().loadSchedules(_userRole);
-                            }
-                          },
-                          labelType: NavigationRailLabelType.all,
-                          selectedIconTheme: IconThemeData(
-                            color: _selectedColor,
-                            size: 30,
-                          ),
-                          unselectedIconTheme: const IconThemeData(
-                            color: Colors.grey,
-                            size: 30,
-                          ),
-                          selectedLabelTextStyle: TextStyle(
-                            color: _selectedColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          destinations: currentNavItems
-                              .map(
-                                (item) => NavigationRailDestination(
-                                  icon: item.icon,
-                                  selectedIcon: item.activeIcon,
-                                  label: Text(item.label ?? ''),
+                        Container(
+                          width: 250,
+                          color: Colors.white,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(24),
+                                child: const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_month,
+                                      size: 32,
+                                      color: Colors.blue,
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      AppStrings.appName,
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              )
-                              .toList(),
+                              ),
+                              const Divider(height: 1),
+                              Expanded(
+                                child: ListView.builder(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  itemCount: currentNavItems.length,
+                                  itemBuilder: (context, index) {
+                                    final item = currentNavItems[index];
+                                    final isSelected =
+                                        state.currentIndex == index;
+                                    return ListTile(
+                                      leading: isSelected
+                                          ? item.activeIcon
+                                          : item.icon,
+                                      title: Text(
+                                        item.label ?? '',
+                                        style: TextStyle(
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          color: isSelected
+                                              ? _selectedColor
+                                              : Colors.grey.shade700,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      selected: isSelected,
+                                      selectedTileColor: _selectedColor
+                                          .withOpacity(0.1),
+                                      iconColor: isSelected
+                                          ? _selectedColor
+                                          : Colors.grey.shade600,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 24,
+                                            vertical: 4,
+                                          ),
+                                      onTap: () {
+                                        _mainCubit.setIndex(index);
+                                        if ((_userRole == UserRole.INTERN &&
+                                                index == 1) ||
+                                            (_userRole == UserRole.MANAGER &&
+                                                index == 2) ||
+                                            (_userRole == UserRole.HR &&
+                                                index == 1)) {
+                                          getIt<ScheduleCubit>().loadSchedules(
+                                            _userRole,
+                                          );
+                                        }
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       if (isWideScreen)
                         const VerticalDivider(thickness: 1, width: 1),

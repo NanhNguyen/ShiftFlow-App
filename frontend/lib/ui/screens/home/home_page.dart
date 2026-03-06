@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildHeader(state.user?.name ?? 'User'),
+                      _buildHeader(state.user?.name ?? 'User', isWide: isWide),
                       if (isWide)
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -230,7 +230,32 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(String name) {
+  Widget _buildHeader(String name, {bool isWide = false}) {
+    if (isWide) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(40, 32, 24, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${AppStrings.welcomeBack}, $name!',
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Đây là tổng quan lịch trình và công việc của bạn.',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
