@@ -1,11 +1,11 @@
 {
-    "name": "schedule_management_frontend",
-    "short_name": "schedule_management_frontend",
+    "name": "Shiftly",
+    "short_name": "Shiftly",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#ffffff",
-    "description": "A new Flutter project.",
+    "description": "Shiftly - Ứng dụng quản lý lịch trình nội bộ",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
