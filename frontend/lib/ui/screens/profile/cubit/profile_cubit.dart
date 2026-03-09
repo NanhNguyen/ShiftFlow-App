@@ -6,6 +6,7 @@ import '../../../di/di_config.dart';
 import '../../home/cubit/home_cubit.dart';
 import '../../notifications/cubit/notification_cubit.dart';
 import '../../main/cubit/main_cubit.dart';
+import '../../schedule/cubit/schedule_cubit.dart';
 import 'profile_state.dart';
 
 @injectable
@@ -28,6 +29,9 @@ class ProfileCubit extends BaseCubit<ProfileState> {
       }
       if (getIt.isRegistered<MainCubit>()) {
         getIt.resetLazySingleton<MainCubit>();
+      }
+      if (getIt.isRegistered<ScheduleCubit>()) {
+        getIt.resetLazySingleton<ScheduleCubit>();
       }
 
       emit(state.copyWith(status: BaseStatus.success, user: null));
@@ -54,6 +58,9 @@ class ProfileCubit extends BaseCubit<ProfileState> {
       }
       if (getIt.isRegistered<MainCubit>()) {
         getIt.resetLazySingleton<MainCubit>();
+      }
+      if (getIt.isRegistered<ScheduleCubit>()) {
+        getIt.resetLazySingleton<ScheduleCubit>();
       }
 
       emit(state.copyWith(status: BaseStatus.success, user: null));

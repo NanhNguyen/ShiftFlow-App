@@ -122,8 +122,7 @@ class ProfilePage extends StatelessWidget {
                               icon: Icons.logout,
                               title: AppStrings.logout,
                               isDestructive: true,
-                              onTap: () =>
-                                  context.read<ProfileCubit>().logout(),
+                              onTap: () => _showLogoutConfirmation(context),
                             ),
                           ],
                         ),
@@ -349,6 +348,33 @@ class ProfilePage extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8,
       ), // Increased spacing
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Xác nhận đăng xuất'),
+        content: const Text('Bạn có chắc chắn muốn đăng xuất không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(AppStrings.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<ProfileCubit>().logout();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text(
+              AppStrings.logout,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
