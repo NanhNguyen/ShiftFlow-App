@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request, UseInterceptors, UploadedFile, UnauthorizedException, Get } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, UseInterceptors, UploadedFile, UnauthorizedException, Get, ConflictException, BadRequestException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -53,14 +53,25 @@ export class UsersController {
     @UseGuards(JwtAuthGuard)
     @Post('create-account')
     async createAccount(@Request() req, @Body() createUserDto: any) {
+        console.log(`User role from JWT strategy: ${req.user?.role}`);
+
         if (req.user.role !== 'HR') {
             throw new UnauthorizedException('Chỉ HR mới có quyền tạo tài khoản.');
         }
 
+        if (!createUserDto.email || !createUserDto.password || !createUserDto.name) {
+            throw new BadRequestException('Vui lòng điền đầy đủ thông tin: Email, Mật khẩu, Họ tên.');
+        }
+
+        const existingUser = await this.usersService.findByEmail(createUserDto.email);
+        if (existingUser) {
+            throw new ConflictException('Email đã tồn tại trên hệ thống.');
+        }
+
         let roleId = '69649755edf9b4ac54f3c596'; // default INTERN
         if (createUserDto.role === 'INTERN') roleId = '69649755edf9b4ac54f3c596';
-        if (createUserDto.role === 'MANAGER') roleId = '69649765edf9b4ac54f3c598';
-        if (createUserDto.role === 'HR') roleId = '6964978cedf9b4ac54f3c59a';
+        else if (createUserDto.role === 'MANAGER') roleId = '69649765edf9b4ac54f3c598';
+        else if (createUserDto.role === 'HR') roleId = '6964978cedf9b4ac54f3c59a';
 
         const userData: any = {
             email: createUserDto.email,
@@ -73,10 +84,14 @@ export class UsersController {
             userData.managerId = createUserDto.managerId;
         }
 
-        const user = await this.usersService.create(userData);
-        // remove password_hash from response
-        const userObj = user.toObject();
-        delete userObj.password_hash;
-        return { message: 'Tạo tài khoản thành công', user: userObj };
+        try {
+            const user = await this.usersService.create(userData);
+            const userObj = user.toObject();
+            delete userObj.password_hash;
+            return { message: 'Tạo tài khoản thành công', user: userObj };
+        } catch (e) {
+            console.error('Lỗi khi tạo tài khoản:', e);
+            throw new BadRequestException('Không thể tạo tài khoản. Vui lòng kiểm tra lại dữ liệu.');
+        }
     }
 }

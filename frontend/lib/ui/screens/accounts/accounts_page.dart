@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../di/di_config.dart';
 import '../../../data/service/user_service.dart';
+import '../main/cubit/main_cubit.dart';
 
 class AccountsPage extends StatefulWidget {
   const AccountsPage({super.key});
@@ -77,14 +78,29 @@ class _AccountsPageState extends State<AccountsPage> {
           _selectedRole = 'INTERN';
           _selectedManagerId = null;
         });
+
+        // Chuyển về màn hình chính sau khi tạo xong
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            getIt<MainCubit>().setIndex(0);
+          }
+        });
       }
     } catch (e) {
+      String errorMsg = 'Có lỗi xảy ra';
+      if (e is dynamic && e.toString().contains('409')) {
+        errorMsg = 'Email đã tồn tại trên hệ thống.';
+      } else if (e is dynamic && e.toString().contains('401')) {
+        errorMsg = 'Bạn không có quyền thực hiện thao tác này.';
+      } else if (e is dynamic && e.toString().contains('400')) {
+        errorMsg = 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.';
+      } else {
+        errorMsg = e.toString();
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Có lỗi xảy ra: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
         );
       }
     } finally {

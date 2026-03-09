@@ -10,10 +10,9 @@ class ApiClient {
   late final Dio dio;
 
   static String get baseUrl {
-    if (kIsWeb) {
-      return 'https://shiftly-app-backend.onrender.com/';
+    if (kDebugMode) {
+      return 'http://localhost:3000/';
     }
-    // For local development on Android emulator
     return 'https://shiftly-app-backend.onrender.com/';
   }
 
