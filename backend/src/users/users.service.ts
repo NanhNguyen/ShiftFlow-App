@@ -71,6 +71,29 @@ export class UsersService {
         });
     }
 
+    async findAllManagedBy(managerId: any): Promise<User[]> {
+        const mgrIdStr = managerId.toString();
+        console.log(`[findAllManagedBy] Querying interns for managerId: ${mgrIdStr}`);
+
+        // Mongoose sometimes struggles with union types or 'any' if not explicitly cast
+        // To be absolutely safe, let's fetch all interns and filter in memory if the query fails,
+        // but let's try a direct query first.
+        let users = await this.userModel.find({ managerId: mgrIdStr }).select('-password_hash').exec();
+
+        if (users.length === 0) {
+            // Fallback: try raw ObjectId if the string didn't work (though Mongoose casts strings to ObjectIds usually)
+            users = await this.userModel.find({ managerId: managerId }).select('-password_hash').exec();
+        }
+
+        console.log(`[findAllManagedBy] Found ${users.length} interns.`);
+        return users.map(user => {
+            if (user.role_id) {
+                user.role = this.mapRoleIdToRole(user.role_id);
+            }
+            return user;
+        });
+    }
+
     async update(id: string, updateData: Partial<User>): Promise<User | null> {
         if (updateData.role_id) {
             updateData.role = this.mapRoleIdToRole(updateData.role_id);

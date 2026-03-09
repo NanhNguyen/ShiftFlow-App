@@ -26,17 +26,17 @@ export class SchedulesController {
 
     @Get('all')
     @Roles(UserRole.MANAGER, UserRole.HR)
-    async getAllSchedules() {
-        return this.schedulesService.findAll();
+    async getAllSchedules(@Request() req: any) {
+        return this.schedulesService.findAll(req.user);
     }
 
     @Get('approved')
-    async getApprovedSchedules() {
-        return this.schedulesService.findApproved();
+    async getApprovedSchedules(@Request() req: any) {
+        return this.schedulesService.findApproved(req.user);
     }
 
     @Patch('batch/status')
-    @Roles(UserRole.MANAGER)
+    @Roles(UserRole.MANAGER, UserRole.HR)
     async updateBatchStatus(
         @Request() req: any,
         @Body('groupId') groupId: string,
@@ -46,7 +46,7 @@ export class SchedulesController {
     }
 
     @Patch(':id/status')
-    @Roles(UserRole.MANAGER)
+    @Roles(UserRole.MANAGER, UserRole.HR)
     async updateStatus(
         @Request() req: any,
         @Param('id') id: string,

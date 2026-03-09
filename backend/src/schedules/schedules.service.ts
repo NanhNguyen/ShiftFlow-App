@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ScheduleRequest, RequestStatus } from './schemas/schedule-request.schema';
@@ -69,58 +69,104 @@ export class SchedulesService {
         return savedRequests;
     }
 
-    async findAll(query: any = {}): Promise<ScheduleRequest[]> {
-        return this.scheduleRequestModel.find(query).populate('employee_id', 'name role').exec();
+    async findAll(user: any): Promise<ScheduleRequest[]> {
+        if (user.role === UserRole.HR) {
+            return this.scheduleRequestModel.find().populate('employee_id', 'name role managerId').exec();
+        }
+
+        // For Manager, fetch all and filter in-memory to avoid MongoDB ObjectID casting issues
+        const allRequests = await this.scheduleRequestModel.find().populate('employee_id', 'name role managerId').exec();
+        const currentManagerId = (user._id || user.id).toString();
+
+        return allRequests.filter(req => {
+            const intern = req.employee_id as any;
+            if (!intern || !intern.managerId) return false;
+            return intern.managerId.toString() === currentManagerId;
+        });
     }
 
     async findByUser(employee_id: string): Promise<ScheduleRequest[]> {
         return this.scheduleRequestModel.find({ employee_id: employee_id as any }).populate('employee_id', 'name role').exec();
     }
 
-    async updateStatus(id: string, status: RequestStatus, approvedBy: string): Promise<ScheduleRequest> {
-        const request = await this.scheduleRequestModel.findByIdAndUpdate(
-            id,
-            { status, approvedBy },
-            { new: true },
-        ).populate('employee_id', 'name');
+    async updateStatus(id: string, status: RequestStatus, approvedById: string): Promise<ScheduleRequest> {
+        const manager = await this.usersService.findById(approvedById);
+        if (!manager) throw new NotFoundException('Manager not found');
 
+        const request = await this.scheduleRequestModel.findById(id).populate('employee_id');
         if (!request) {
             throw new NotFoundException('Request not found');
         }
 
+        // Authorization check: Manager must manage the intern
+        if (manager.role === UserRole.MANAGER) {
+            const intern = request.employee_id as any;
+
+            console.log(`Checking permission for Manager: ${manager._id} (Name: ${manager.name})`);
+            console.log(`Request Intern ID: ${intern._id} (Name: ${intern.name})`);
+            console.log(`Intern assigned Manager ID: ${intern.managerId}`);
+
+            const internManagerId = intern.managerId?.toString();
+            const currentManagerId = manager._id.toString();
+
+            if (!internManagerId || internManagerId !== currentManagerId) {
+                console.warn(`Permission Denied: ${internManagerId} != ${currentManagerId}`);
+                throw new ForbiddenException('Bạn không có quyền duyệt yêu cầu của thực tập sinh này.');
+            }
+        }
+
+        request.status = status;
+        request.approvedBy = approvedById as any;
+        const savedRequest = await request.save();
+
         // Notify Intern
         const title = status === RequestStatus.APPROVED ? 'Request Approved' : 'Request Rejected';
-        const message = `Your schedule request has been ${status.toLowerCase()}.`;
+        const message = `Yêu cầu lịch trình của bạn đã được ${status === RequestStatus.APPROVED ? 'chấp nhận' : 'từ chối'}.`;
 
         await this.notificationsService.create(
-            (request.employee_id as any)._id.toString(),
+            (savedRequest.employee_id as any)._id.toString(),
             title,
             message,
             status === RequestStatus.APPROVED ? 'REQUEST_APPROVED' : 'REQUEST_REJECTED'
         );
 
-        return request;
+        return savedRequest;
     }
 
-    async updateBatchStatus(groupId: string, status: RequestStatus, approvedBy: string): Promise<any> {
+    async updateBatchStatus(groupId: string, status: RequestStatus, approvedById: string): Promise<any> {
+        const manager = await this.usersService.findById(approvedById);
+        if (!manager) throw new NotFoundException('Manager not found');
+
+        const firstRequest = await this.scheduleRequestModel.findOne({ groupId }).populate('employee_id');
+        if (!firstRequest) {
+            throw new NotFoundException('Request group not found');
+        }
+
+        // Authorization check
+        if (manager.role === UserRole.MANAGER) {
+            const intern = firstRequest.employee_id as any;
+            const internManagerId = intern.managerId?.toString();
+            const currentManagerId = manager._id.toString();
+
+            if (!internManagerId || internManagerId !== currentManagerId) {
+                throw new ForbiddenException('Bạn không có quyền duyệt yêu cầu của thực tập sinh này.');
+            }
+        }
+
         const result = await this.scheduleRequestModel.updateMany(
             { groupId },
-            { status, approvedBy },
+            { status, approvedBy: approvedById as any },
         );
 
-        // Find one request to get employee_id
-        const firstRequest = await this.scheduleRequestModel.findOne({ groupId });
-        if (firstRequest) {
-            const title = status === RequestStatus.APPROVED ? 'Request Approved' : 'Request Rejected';
-            const message = `Your batch schedule request has been ${status.toLowerCase()}.`;
+        const title = status === RequestStatus.APPROVED ? 'Batch Request Approved' : 'Batch Request Rejected';
+        const message = `Yêu cầu đăng ký lịch hàng loạt của bạn đã được ${status === RequestStatus.APPROVED ? 'chấp nhận' : 'từ chối'}.`;
 
-            await this.notificationsService.create(
-                firstRequest.employee_id.toString(),
-                title,
-                message,
-                status === RequestStatus.APPROVED ? 'REQUEST_APPROVED' : 'REQUEST_REJECTED'
-            );
-        }
+        await this.notificationsService.create(
+            (firstRequest.employee_id as any)._id.toString(),
+            title,
+            message,
+            status === RequestStatus.APPROVED ? 'REQUEST_APPROVED' : 'REQUEST_REJECTED'
+        );
 
         return result;
     }
@@ -145,7 +191,18 @@ export class SchedulesService {
         } as any);
     }
 
-    async findApproved(): Promise<ScheduleRequest[]> {
-        return this.scheduleRequestModel.find({ status: RequestStatus.APPROVED }).populate('employee_id', 'name role').exec();
+    async findApproved(user: any): Promise<ScheduleRequest[]> {
+        if (user.role === UserRole.HR) {
+            return this.scheduleRequestModel.find({ status: RequestStatus.APPROVED }).populate('employee_id', 'name role managerId').exec();
+        }
+
+        const allApproved = await this.scheduleRequestModel.find({ status: RequestStatus.APPROVED }).populate('employee_id', 'name role managerId').exec();
+        const currentManagerId = (user._id || user.id).toString();
+
+        return allApproved.filter(req => {
+            const intern = req.employee_id as any;
+            if (!intern || !intern.managerId) return false;
+            return intern.managerId.toString() === currentManagerId;
+        });
     }
 }
