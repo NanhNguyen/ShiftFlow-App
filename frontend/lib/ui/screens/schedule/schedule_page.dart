@@ -43,7 +43,7 @@ class _SchedulePageState extends State<SchedulePage> {
         _userRole == UserRole.MANAGER || _userRole == UserRole.HR;
 
     return BlocProvider.value(
-      value: getIt<ScheduleCubit>()..loadSchedules(_userRole),
+      value: getIt<ScheduleCubit>(),
       child: Scaffold(
         appBar: AppBar(
           title: Text(
