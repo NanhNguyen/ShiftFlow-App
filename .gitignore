@@ -5,4 +5,4 @@
 *.log
 
 # Root level ignores
-# (handled by subdirectories mostly)
+.agent/
