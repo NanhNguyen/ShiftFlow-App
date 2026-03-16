@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../di/di_config.dart';
 import '../../../data/service/user_service.dart';
 import '../main/cubit/main_cubit.dart';
@@ -113,7 +114,15 @@ class _AccountsPageState extends State<AccountsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cấp tài khoản mới'), elevation: 0),
+      appBar: AppBar(
+        title: const Text('Cấp tài khoản mới'),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.read<MainCubit>().setIndex(0),
+        ),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(

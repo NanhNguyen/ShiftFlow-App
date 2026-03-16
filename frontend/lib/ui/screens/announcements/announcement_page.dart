@@ -8,6 +8,7 @@ import '../../../data/service/auth_service.dart';
 import '../../di/di_config.dart';
 import 'cubit/announcement_cubit.dart';
 import 'cubit/announcement_state.dart';
+import '../main/cubit/main_cubit.dart';
 
 @RoutePage()
 class AnnouncementPage extends StatefulWidget {
@@ -40,6 +41,10 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           title: const Text(
             'Bản tin HR',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.read<MainCubit>().setIndex(0),
           ),
           centerTitle: true,
           actions: [

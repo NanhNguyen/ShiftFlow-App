@@ -39,6 +39,11 @@ class _ManagerRequestPageState extends State<ManagerRequestPage> {
                   ? AppStrings.manageRequests
                   : AppStrings.allRequestsView,
             ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.read<MainCubit>().setIndex(0),
+            ),
+            centerTitle: true,
             bottom: isManager
                 ? const TabBar(
                     tabs: [

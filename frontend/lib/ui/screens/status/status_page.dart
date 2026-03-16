@@ -8,6 +8,7 @@ import 'cubit/status_cubit.dart';
 import 'cubit/status_state.dart';
 import 'widget/request_item.dart';
 import '../../../resource/app_strings.dart';
+import '../main/cubit/main_cubit.dart';
 
 class StatusPage extends StatelessWidget {
   const StatusPage({super.key});
@@ -29,6 +30,11 @@ class StatusPage extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.read<MainCubit>().setIndex(0),
+            ),
+            centerTitle: true,
             bottom: TabBar(
               labelColor: Colors.white,
               unselectedLabelColor: Colors.white.withOpacity(0.6),

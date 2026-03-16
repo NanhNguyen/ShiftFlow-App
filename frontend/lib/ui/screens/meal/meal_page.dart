@@ -11,6 +11,8 @@ import '../../di/di_config.dart';
 import 'cubit/meal_cubit.dart';
 import 'cubit/meal_state.dart';
 
+import '../main/cubit/main_cubit.dart';
+
 @RoutePage()
 class MealPage extends StatefulWidget {
   const MealPage({super.key});
@@ -62,6 +64,10 @@ class _MealPageState extends State<MealPage>
           title: const Text(
             'Lịch ăn cơm',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.read<MainCubit>().setIndex(0),
           ),
           centerTitle: true,
           bottom: _isHR
