@@ -11,5 +11,6 @@ class AnnouncementState with _$AnnouncementState {
     @Default(BaseStatus.initial) BaseStatus submitStatus,
     @Default([]) List<AnnouncementModel> announcements,
     String? errorMessage,
+    String? successMessage,
   }) = _AnnouncementState;
 }

@@ -67,11 +67,14 @@ class ScheduleFormModal extends StatelessWidget {
             ),
             clipBehavior: Clip.antiAlias,
             insetPadding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 32,
+              horizontal: 20,
+              vertical: 24,
             ),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480, maxHeight: 700),
+              constraints: BoxConstraints(
+                maxWidth: 480,
+                maxHeight: MediaQuery.of(context).size.height * 0.85,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -156,13 +159,13 @@ class ScheduleFormModal extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 6),
                                 const Icon(
                                   Icons.arrow_forward,
                                   color: Colors.grey,
-                                  size: 16,
+                                  size: 14,
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 6),
                                 Expanded(
                                   child: _buildDateCard(
                                     context,
@@ -317,29 +320,36 @@ class ScheduleFormModal extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(4),
-      child: Row(
-        children: [
-          _buildToggleBtn(
-            context,
-            label: AppStrings.recurringLeave,
-            icon: Icons.repeat,
-            selected: isRecurring,
-            color: color,
-            onTap: () => context.read<ScheduleFormCubit>().updateField(
-              isRecurring: true,
-            ),
-          ),
-          _buildToggleBtn(
-            context,
-            label: AppStrings.adhocLeave,
-            icon: Icons.event_note,
-            selected: !isRecurring,
-            color: Colors.orange.shade700,
-            onTap: () => context.read<ScheduleFormCubit>().updateField(
-              isRecurring: false,
-            ),
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final showIcons = constraints.maxWidth > 200;
+          return Row(
+            children: [
+              _buildToggleBtn(
+                context,
+                label: AppStrings.recurringLeave,
+                icon: Icons.repeat,
+                selected: isRecurring,
+                color: color,
+                showIcon: showIcons,
+                onTap: () => context.read<ScheduleFormCubit>().updateField(
+                  isRecurring: true,
+                ),
+              ),
+              _buildToggleBtn(
+                context,
+                label: AppStrings.adhocLeave,
+                icon: Icons.event_note,
+                selected: !isRecurring,
+                color: Colors.orange.shade700,
+                showIcon: showIcons,
+                onTap: () => context.read<ScheduleFormCubit>().updateField(
+                  isRecurring: false,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -351,6 +361,7 @@ class ScheduleFormModal extends StatelessWidget {
     required bool selected,
     required Color color,
     required VoidCallback onTap,
+    bool showIcon = true,
   }) {
     return Expanded(
       child: GestureDetector(
@@ -365,18 +376,24 @@ class ScheduleFormModal extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 16,
-                color: selected ? Colors.white : Colors.grey.shade600,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+              if (showIcon) ...[
+                Icon(
+                  icon,
+                  size: 16,
                   color: selected ? Colors.white : Colors.grey.shade600,
+                ),
+                const SizedBox(width: 6),
+              ],
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: selected ? Colors.white : Colors.grey.shade600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
             ],

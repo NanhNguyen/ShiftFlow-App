@@ -9,7 +9,9 @@ part of 'meal_model.dart';
 _$MealModelImpl _$$MealModelImplFromJson(Map<String, dynamic> json) =>
     _$MealModelImpl(
       id: json['_id'] as String,
-      userId: json['userId'] as String,
+      userId: _readUserId(json, 'userId') as String,
+      userMetadata:
+          _readUserMetadata(json, 'user_metadata') as Map<String, dynamic>?,
       shift: $enumDecode(_$MealShiftEnumMap, json['shift']),
       isRecurring: json['isRecurring'] as bool? ?? false,
       weekdays:
@@ -17,19 +19,19 @@ _$MealModelImpl _$$MealModelImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => $enumDecode(_$MealWeekdayEnumMap, e))
               .toList() ??
           const [],
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: json['endDate'] == null
+      startDate: DateTime.parse(_readDate(json, 'startDate') as String),
+      endDate: _readDate(json, 'endDate') == null
           ? null
-          : DateTime.parse(json['endDate'] as String),
+          : DateTime.parse(_readDate(json, 'endDate') as String),
       specificDates:
           (json['specificDates'] as List<dynamic>?)
               ?.map((e) => DateTime.parse(e as String))
               .toList() ??
           const [],
       note: json['note'] as String?,
-      createdAt: json['createdAt'] == null
+      createdAt: _readDate(json, 'createdAt') == null
           ? null
-          : DateTime.parse(json['createdAt'] as String),
+          : DateTime.parse(_readDate(json, 'createdAt') as String),
     );
 
 Map<String, dynamic> _$$MealModelImplToJson(
@@ -37,6 +39,7 @@ Map<String, dynamic> _$$MealModelImplToJson(
 ) => <String, dynamic>{
   '_id': instance.id,
   'userId': instance.userId,
+  'user_metadata': instance.userMetadata,
   'shift': _$MealShiftEnumMap[instance.shift]!,
   'isRecurring': instance.isRecurring,
   'weekdays': instance.weekdays.map((e) => _$MealWeekdayEnumMap[e]!).toList(),
@@ -49,11 +52,7 @@ Map<String, dynamic> _$$MealModelImplToJson(
   'createdAt': instance.createdAt?.toIso8601String(),
 };
 
-const _$MealShiftEnumMap = {
-  MealShift.MORNING: 'MORNING',
-  MealShift.AFTERNOON: 'AFTERNOON',
-  MealShift.BOTH: 'BOTH',
-};
+const _$MealShiftEnumMap = {MealShift.LUNCH: 'LUNCH'};
 
 const _$MealWeekdayEnumMap = {
   MealWeekday.MONDAY: 'MONDAY',

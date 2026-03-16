@@ -5,6 +5,8 @@ import '../../../../data/service/auth_service.dart';
 import '../../../../data/repo/notification_repo.dart';
 import '../../../../data/repo/schedule_request_repo.dart';
 import '../../../../data/model/schedule_request_model.dart';
+import '../../../di/di_config.dart';
+import '../../notifications/cubit/notification_cubit.dart';
 import 'home_state.dart';
 
 @lazySingleton
@@ -23,12 +25,13 @@ class HomeCubit extends BaseCubit<HomeState> {
           currentUser?.role == UserRole.MANAGER ||
           currentUser?.role == UserRole.HR;
 
+      final notifCubit = getIt<NotificationCubit>();
       final results = await Future.wait([
         if (!isManagerOrHR)
           _scheduleRepo.getMySchedules()
         else
           Future.value(<ScheduleRequestModel>[]),
-        _notificationRepo.getNotifications(),
+        notifCubit.loadNotifications(),
         if (isManagerOrHR)
           _scheduleRepo.getAllSchedules()
         else
@@ -36,7 +39,8 @@ class HomeCubit extends BaseCubit<HomeState> {
       ]);
 
       final mySchedules = results[0] as List<ScheduleRequestModel>;
-      final notifications = results[1] as List<dynamic>;
+      // notifications don't come from results[1] anymore, they are in notifCubit.state
+      final notifications = notifCubit.state.notifications;
       final allSchedules = results[2] as List<ScheduleRequestModel>;
 
       // Manager/HR: count ALL pending; Intern: count their own pending

@@ -34,6 +34,20 @@ export class User extends Document {
 
     @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
     managerId: any;
+
+    @Prop({
+        type: [
+            {
+                endpoint: String,
+                keys: {
+                    p256dh: String,
+                    auth: String,
+                },
+            },
+        ],
+        default: [],
+    })
+    pushSubscriptions: any[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

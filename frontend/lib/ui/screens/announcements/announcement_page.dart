@@ -35,10 +35,10 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF0F2F5),
         appBar: AppBar(
-          backgroundColor: Colors.indigo.shade700,
+          backgroundColor: Colors.blue.shade700,
           foregroundColor: Colors.white,
           title: const Text(
-            'Bảng thông báo',
+            'Bản tin HR',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           centerTitle: true,
@@ -55,8 +55,8 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           listener: (context, state) {
             if (state.submitStatus == BaseStatus.success) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('✅ Đã đăng thông báo, intern sẽ nhận được!'),
+                SnackBar(
+                  content: Text(state.successMessage ?? 'Thành công!'),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -90,8 +90,8 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  Colors.indigo.shade700,
-                                  Colors.indigo.shade500,
+                                  Colors.blue.shade700,
+                                  Colors.blue.shade500,
                                 ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
@@ -192,7 +192,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         floatingActionButton: _isHR
             ? FloatingActionButton.extended(
                 onPressed: () => _showComposeSheet(context),
-                backgroundColor: Colors.indigo.shade700,
+                backgroundColor: Colors.blue.shade700,
                 foregroundColor: Colors.white,
                 icon: const Icon(Icons.campaign),
                 label: const Text(
@@ -236,11 +236,11 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
               children: [
                 CircleAvatar(
                   radius: 22,
-                  backgroundColor: Colors.indigo.shade100,
+                  backgroundColor: Colors.blue.shade100,
                   child: Text(
                     authorLetter,
                     style: TextStyle(
-                      color: Colors.indigo.shade700,
+                      color: Colors.blue.shade700,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -268,37 +268,63 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.indigo.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.campaign,
-                        size: 12,
-                        color: Colors.indigo.shade700,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'HR',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.indigo.shade700,
+                if (_isHR)
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'delete') {
+                        _confirmDelete(context, announcement.id);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_outline, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text(
+                              'Xóa thông báo',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ],
                         ),
                       ),
                     ],
+                    icon: const Icon(Icons.more_vert, color: Colors.grey),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.campaign,
+                          size: 12,
+                          color: Colors.blue.shade700,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'HR',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
+
             const SizedBox(height: 14),
             Text(
               announcement.title,
@@ -332,6 +358,30 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, String id) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Xóa thông báo'),
+        content: const Text('Bạn có chắc chắn muốn xóa thông báo này không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _cubit.deleteAnnouncement(id);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Xóa', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
@@ -458,7 +508,7 @@ class _ComposeSheetState extends State<_ComposeSheet> {
                             ),
                           ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo.shade700,
+                      backgroundColor: Colors.blue.shade700,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),

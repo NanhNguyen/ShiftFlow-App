@@ -19,4 +19,8 @@ class AnnouncementApi {
   Future<Response> markSeen(String id) {
     return _apiClient.patch('/announcements/$id/seen');
   }
+
+  Future<Response> deleteAnnouncement(String id) {
+    return _apiClient.delete('/announcements/$id');
+  }
 }

@@ -10,6 +10,8 @@ class MealState with _$MealState {
     @Default(BaseStatus.initial) BaseStatus status,
     @Default(BaseStatus.initial) BaseStatus submitStatus,
     @Default([]) List<MealModel> meals,
+    @Default([]) List<MealModel> overviewMeals,
+    @Default([]) List<MealModel> allRegistrations,
     String? errorMessage,
   }) = _MealState;
 }

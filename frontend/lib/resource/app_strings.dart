@@ -141,4 +141,7 @@ class AppStrings {
   static const String absence = 'Nghỉ phép';
   static const String enterEmail = 'Nhập email';
   static const String enterPassword = 'Nhập mật khẩu';
+  static const String accounts = 'Tài khoản';
+  static const String announcements = 'Bản tin';
+  static const String today = 'Hôm nay';
 }

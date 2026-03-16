@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'meal_model.freezed.dart';
 part 'meal_model.g.dart';
 
-enum MealShift { MORNING, AFTERNOON, BOTH }
+enum MealShift { LUNCH }
 
 enum MealWeekday { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY }
 
@@ -42,12 +42,8 @@ extension MealWeekdayExtension on MealWeekday {
 extension MealShiftExtension on MealShift {
   String get displayName {
     switch (this) {
-      case MealShift.MORNING:
-        return 'Bữa sáng';
-      case MealShift.AFTERNOON:
+      case MealShift.LUNCH:
         return 'Bữa trưa';
-      case MealShift.BOTH:
-        return 'Cả ngày';
     }
   }
 }
@@ -56,17 +52,36 @@ extension MealShiftExtension on MealShift {
 class MealModel with _$MealModel {
   const factory MealModel({
     @JsonKey(name: '_id') required String id,
-    required String userId,
+    @JsonKey(name: 'userId', readValue: _readUserId) required String userId,
+    @JsonKey(name: 'user_metadata', readValue: _readUserMetadata)
+    Map<String, dynamic>? userMetadata,
     required MealShift shift,
     @Default(false) bool isRecurring,
     @Default([]) List<MealWeekday> weekdays,
-    @JsonKey(name: 'startDate') required DateTime startDate,
-    @JsonKey(name: 'endDate') DateTime? endDate,
+    @JsonKey(name: 'startDate', readValue: _readDate)
+    required DateTime startDate,
+    @JsonKey(name: 'endDate', readValue: _readDate) DateTime? endDate,
     @Default([]) List<DateTime> specificDates,
     String? note,
-    @JsonKey(name: 'createdAt') DateTime? createdAt,
+    @JsonKey(name: 'createdAt', readValue: _readDate) DateTime? createdAt,
   }) = _MealModel;
 
   factory MealModel.fromJson(Map<String, dynamic> json) =>
       _$MealModelFromJson(json);
 }
+
+Object? _readUserId(Map json, String key) {
+  final val = json['userId'];
+  if (val is Map) return val['_id'];
+  return val;
+}
+
+Object? _readUserMetadata(Map json, String key) {
+  final val = json['userId'];
+  if (val is Map) {
+    return {'name': val['name'], 'role': val['role'], '_id': val['_id']};
+  }
+  return null;
+}
+
+Object? _readDate(Map json, String key) => json[key];

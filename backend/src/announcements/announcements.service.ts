@@ -38,6 +38,7 @@ export class AnnouncementsService {
                     `📢 Thông báo từ HR: ${data.title}`,
                     data.content,
                     'ANNOUNCEMENT',
+                    saved._id.toString(),
                 ),
             ),
         );
@@ -58,4 +59,13 @@ export class AnnouncementsService {
             { $addToSet: { seenBy: userId } },
         );
     }
+
+    async remove(id: string): Promise<void> {
+        // 1. Xóa tất cả thông báo liên quan trong lịch sử (noti của các intern)
+        await this.notificationsService.removeBySourceId(id);
+
+        // 2. Xóa bài thông báo chính
+        await this.announcementModel.findByIdAndDelete(id).exec();
+    }
 }
+

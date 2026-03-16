@@ -22,6 +22,7 @@ mixin _$AnnouncementState {
   List<AnnouncementModel> get announcements =>
       throw _privateConstructorUsedError;
   String? get errorMessage => throw _privateConstructorUsedError;
+  String? get successMessage => throw _privateConstructorUsedError;
 
   /// Create a copy of AnnouncementState
   /// with the given fields replaced by the non-null parameter values.
@@ -42,6 +43,7 @@ abstract class $AnnouncementStateCopyWith<$Res> {
     BaseStatus submitStatus,
     List<AnnouncementModel> announcements,
     String? errorMessage,
+    String? successMessage,
   });
 }
 
@@ -64,6 +66,7 @@ class _$AnnouncementStateCopyWithImpl<$Res, $Val extends AnnouncementState>
     Object? submitStatus = null,
     Object? announcements = null,
     Object? errorMessage = freezed,
+    Object? successMessage = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -82,6 +85,10 @@ class _$AnnouncementStateCopyWithImpl<$Res, $Val extends AnnouncementState>
             errorMessage: freezed == errorMessage
                 ? _value.errorMessage
                 : errorMessage // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            successMessage: freezed == successMessage
+                ? _value.successMessage
+                : successMessage // ignore: cast_nullable_to_non_nullable
                       as String?,
           )
           as $Val,
@@ -103,6 +110,7 @@ abstract class _$$AnnouncementStateImplCopyWith<$Res>
     BaseStatus submitStatus,
     List<AnnouncementModel> announcements,
     String? errorMessage,
+    String? successMessage,
   });
 }
 
@@ -124,6 +132,7 @@ class __$$AnnouncementStateImplCopyWithImpl<$Res>
     Object? submitStatus = null,
     Object? announcements = null,
     Object? errorMessage = freezed,
+    Object? successMessage = freezed,
   }) {
     return _then(
       _$AnnouncementStateImpl(
@@ -143,6 +152,10 @@ class __$$AnnouncementStateImplCopyWithImpl<$Res>
             ? _value.errorMessage
             : errorMessage // ignore: cast_nullable_to_non_nullable
                   as String?,
+        successMessage: freezed == successMessage
+            ? _value.successMessage
+            : successMessage // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -156,6 +169,7 @@ class _$AnnouncementStateImpl implements _AnnouncementState {
     this.submitStatus = BaseStatus.initial,
     final List<AnnouncementModel> announcements = const [],
     this.errorMessage,
+    this.successMessage,
   }) : _announcements = announcements;
 
   @override
@@ -175,10 +189,12 @@ class _$AnnouncementStateImpl implements _AnnouncementState {
 
   @override
   final String? errorMessage;
+  @override
+  final String? successMessage;
 
   @override
   String toString() {
-    return 'AnnouncementState(status: $status, submitStatus: $submitStatus, announcements: $announcements, errorMessage: $errorMessage)';
+    return 'AnnouncementState(status: $status, submitStatus: $submitStatus, announcements: $announcements, errorMessage: $errorMessage, successMessage: $successMessage)';
   }
 
   @override
@@ -194,7 +210,9 @@ class _$AnnouncementStateImpl implements _AnnouncementState {
               _announcements,
             ) &&
             (identical(other.errorMessage, errorMessage) ||
-                other.errorMessage == errorMessage));
+                other.errorMessage == errorMessage) &&
+            (identical(other.successMessage, successMessage) ||
+                other.successMessage == successMessage));
   }
 
   @override
@@ -204,6 +222,7 @@ class _$AnnouncementStateImpl implements _AnnouncementState {
     submitStatus,
     const DeepCollectionEquality().hash(_announcements),
     errorMessage,
+    successMessage,
   );
 
   /// Create a copy of AnnouncementState
@@ -224,6 +243,7 @@ abstract class _AnnouncementState implements AnnouncementState {
     final BaseStatus submitStatus,
     final List<AnnouncementModel> announcements,
     final String? errorMessage,
+    final String? successMessage,
   }) = _$AnnouncementStateImpl;
 
   @override
@@ -234,6 +254,8 @@ abstract class _AnnouncementState implements AnnouncementState {
   List<AnnouncementModel> get announcements;
   @override
   String? get errorMessage;
+  @override
+  String? get successMessage;
 
   /// Create a copy of AnnouncementState
   /// with the given fields replaced by the non-null parameter values.

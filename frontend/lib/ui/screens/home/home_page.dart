@@ -57,7 +57,11 @@ class HomePage extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     _buildTodayStatus(state.todaySchedule),
-                                    _buildQuickActions(context, isWide: true),
+                                    _buildQuickActions(
+                                      context,
+                                      state,
+                                      isWide: true,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -101,7 +105,7 @@ class HomePage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildTodayStatus(state.todaySchedule),
-                            _buildQuickActions(context, isWide: false),
+                            _buildQuickActions(context, state, isWide: false),
                             _buildQuickStats(state),
                             const Padding(
                               padding: EdgeInsets.symmetric(
@@ -134,8 +138,7 @@ class HomePage extends StatelessWidget {
             ),
           ),
           floatingActionButton: () {
-            final role =
-                getIt<AuthService>().currentUser?.role ?? UserRole.INTERN;
+            // Only Intern and Employee can register leave
             if (role == UserRole.INTERN || role == UserRole.EMPLOYEE) {
               return FloatingActionButton.extended(
                 onPressed: () {
@@ -297,9 +300,142 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActions(BuildContext context, {bool isWide = false}) {
+  Widget _buildQuickActions(
+    BuildContext context,
+    HomeState state, {
+    bool isWide = false,
+  }) {
     final role = getIt<AuthService>().currentUser?.role ?? UserRole.INTERN;
-    final isManagerOrHR = role == UserRole.MANAGER || role == UserRole.HR;
+
+    List<Widget> actions;
+    if (role == UserRole.MANAGER) {
+      actions = [
+        _buildActionItem(
+          context,
+          AppStrings.requests,
+          Icons.pending_actions,
+          Colors.orange,
+          tabIndex: 1,
+          badgeCount: state.pendingCount,
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.schedule,
+          Icons.calendar_month,
+          Colors.blue,
+          tabIndex: 2,
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.notifications,
+          Icons.notifications,
+          Colors.indigo,
+          tabIndex: 3,
+          badgeCount: state.unreadNotificationCount,
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.profile,
+          Icons.person,
+          Colors.green,
+          tabIndex: 4,
+        ),
+      ];
+    } else if (role == UserRole.HR) {
+      actions = [
+        _buildActionItem(
+          context,
+          'Thống kê cơm',
+          Icons.rice_bowl,
+          Colors.deepOrange,
+          tabIndex: 1,
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.schedule,
+          Icons.calendar_month,
+          Colors.blue,
+          tabIndex: 2,
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.accounts,
+          Icons.people,
+          Colors.purple,
+          tabIndex: 3,
+        ),
+        _buildActionItem(
+          context,
+          'Bản tin HR',
+          Icons.campaign,
+          Colors.indigo,
+          tabIndex: 4,
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.notifications,
+          Icons.notifications,
+          Colors.teal,
+          tabIndex: 5,
+          badgeCount: state.unreadNotificationCount,
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.profile,
+          Icons.person,
+          Colors.green,
+          tabIndex: 6,
+        ),
+      ];
+    } else {
+      // Intern/Employee
+      actions = [
+        _buildActionItem(
+          context,
+          'Đặt cơm',
+          Icons.rice_bowl,
+          Colors.deepOrange,
+          tabIndex: 1,
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.status,
+          Icons.assignment,
+          Colors.teal,
+          tabIndex: 3,
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.announcements,
+          Icons.campaign,
+          Colors.indigo,
+          tabIndex: 4,
+        ),
+        _buildActionItem(
+          context,
+          'Đăng ký nghỉ',
+          Icons.event_note,
+          Colors.orange,
+          onTap: () =>
+              showScheduleFormModal(context, isInitialRecurring: false),
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.notifications,
+          Icons.notifications,
+          Colors.blue,
+          tabIndex: 5,
+          badgeCount: state.unreadNotificationCount,
+        ),
+        _buildActionItem(
+          context,
+          AppStrings.profile,
+          Icons.person,
+          Colors.green,
+          tabIndex: 6,
+        ),
+      ];
+    }
 
     return Padding(
       padding: EdgeInsets.fromLTRB(isWide ? 0 : 20, 24, isWide ? 0 : 20, 0),
@@ -310,70 +446,15 @@ class HomePage extends StatelessWidget {
             AppStrings.quickActions,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: isManagerOrHR
-                ? [
-                    _buildActionItem(
-                      context,
-                      AppStrings.requests,
-                      Icons.pending_actions,
-                      Colors.orange,
-                      tabIndex: 1,
-                    ),
-                    _buildActionItem(
-                      context,
-                      AppStrings.schedule,
-                      Icons.calendar_month,
-                      Colors.blue,
-                      tabIndex: 2,
-                    ),
-                    _buildActionItem(
-                      context,
-                      AppStrings.profile,
-                      Icons.person,
-                      Colors.green,
-                      tabIndex: 3,
-                    ),
-                  ]
-                : [
-                    _buildActionItem(
-                      context,
-                      'Đặt cơm',
-                      Icons.rice_bowl,
-                      Colors.deepOrange,
-                      tabIndex: 1, // MealPage is at index 1 for intern
-                    ),
-                    _buildActionItem(
-                      context,
-                      AppStrings.recurringLeave,
-                      Icons.repeat,
-                      Colors.blue,
-                      onTap: () => showScheduleFormModal(
-                        context,
-                        isInitialRecurring: true,
-                      ),
-                    ),
-                    _buildActionItem(
-                      context,
-                      AppStrings.adhocLeave,
-                      Icons.event_note,
-                      Colors.orange,
-                      onTap: () => showScheduleFormModal(
-                        context,
-                        isInitialRecurring: false,
-                      ),
-                    ),
-                    _buildActionItem(
-                      context,
-                      AppStrings.profile,
-                      Icons.person,
-                      Colors.green,
-                      tabIndex:
-                          5, // Profile is at index 5 for intern (0=Home,1=Meal,2=Schedule,3=Status,4=Notif,5=Profile)
-                    ),
-                  ],
+          const SizedBox(height: 16),
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 4,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 0.75,
+            children: actions,
           ),
         ],
       ),
@@ -387,32 +468,82 @@ class HomePage extends StatelessWidget {
     Color color, {
     int? tabIndex,
     VoidCallback? onTap,
+    int badgeCount = 0,
   }) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        InkWell(
-          onTap:
-              onTap ??
-              () {
-                if (tabIndex != null) {
-                  context.read<MainCubit>().setIndex(tabIndex);
-                }
-              },
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            width: 72, // Increased from 64
-            height: 72,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(18),
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            InkWell(
+              onTap:
+                  onTap ??
+                  () {
+                    if (tabIndex != null) {
+                      context.read<MainCubit>().setIndex(tabIndex);
+                    }
+                  },
+              borderRadius: BorderRadius.circular(16),
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(icon, color: color, size: 30),
+                ),
+              ),
             ),
-            child: Icon(icon, color: color, size: 34), // Increased from 28
-          ),
+            if (badgeCount > 0)
+              Positioned(
+                right: -5,
+                top: -5,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 20,
+                    minHeight: 20,
+                  ),
+                  child: Center(
+                    child: Text(
+                      badgeCount > 99 ? '99+' : '$badgeCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         Text(
           label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

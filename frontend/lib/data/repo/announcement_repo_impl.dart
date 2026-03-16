@@ -28,4 +28,9 @@ class AnnouncementRepoImpl implements AnnouncementRepo {
   Future<void> markSeen(String id) async {
     await _api.markSeen(id);
   }
+
+  @override
+  Future<void> deleteAnnouncement(String id) async {
+    await _api.deleteAnnouncement(id);
+  }
 }

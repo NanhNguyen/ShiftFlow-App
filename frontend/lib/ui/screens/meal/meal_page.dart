@@ -2,8 +2,11 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
+import '../../../resource/app_strings.dart';
 import '../../../data/constant/enums.dart';
 import '../../../data/model/meal_model.dart';
+import '../../../data/service/auth_service.dart';
 import '../../di/di_config.dart';
 import 'cubit/meal_cubit.dart';
 import 'cubit/meal_state.dart';
@@ -16,14 +19,36 @@ class MealPage extends StatefulWidget {
   State<MealPage> createState() => _MealPageState();
 }
 
-class _MealPageState extends State<MealPage> {
+class _MealPageState extends State<MealPage>
+    with SingleTickerProviderStateMixin {
   late final MealCubit _cubit;
+  TabController? _tabController;
+  DateTime _overviewDate = DateTime.now();
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   void initState() {
     super.initState();
+    _overviewDate = DateTime.now();
+    _selectedDay = _overviewDate;
+    _focusedDay = _overviewDate;
+
     _cubit = getIt<MealCubit>()..loadMeals();
+    final role = getIt<AuthService>().currentUser?.role;
+    if (role == UserRole.HR) {
+      _tabController = TabController(length: 2, vsync: this, initialIndex: 1);
+      _cubit.loadAllRegistrations();
+    }
   }
+
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    super.dispose();
+  }
+
+  bool get _isHR => getIt<AuthService>().currentUser?.role == UserRole.HR;
 
   @override
   Widget build(BuildContext context) {
@@ -32,101 +57,36 @@ class _MealPageState extends State<MealPage> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF0F2F5),
         appBar: AppBar(
-          backgroundColor: Colors.orange.shade700,
+          backgroundColor: Colors.blue.shade700,
           foregroundColor: Colors.white,
           title: const Text(
-            'Đăng ký cơm',
+            'Lịch ăn cơm',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           centerTitle: true,
+          bottom: _isHR
+              ? TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(text: 'Của tôi'),
+                    Tab(text: 'Thống kê'),
+                  ],
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.white70,
+                  indicatorColor: Colors.white,
+                  indicatorWeight: 3,
+                )
+              : null,
         ),
-        body: BlocConsumer<MealCubit, MealState>(
-          listener: (context, state) {
-            if (state.submitStatus == BaseStatus.success) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('✅ Đăng ký cơm thành công!'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            } else if (state.submitStatus == BaseStatus.error) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.errorMessage ?? 'Đăng ký thất bại'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
-          builder: (context, state) {
-            return RefreshIndicator(
-              onRefresh: () => _cubit.loadMeals(),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 700),
-                  child: CustomScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: _buildRegisterCard(context, state),
-                        ),
-                      ),
-                      if (state.meals.isNotEmpty) ...[
-                        const SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                            child: Text(
-                              'Lịch đăng ký của bạn',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) =>
-                                _buildMealCard(context, state.meals[index]),
-                            childCount: state.meals.length,
-                          ),
-                        ),
-                      ] else if (state.status == BaseStatus.success)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.all(40),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.rice_bowl_outlined,
-                                  size: 60,
-                                  color: Colors.grey.shade400,
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'Chưa có lịch đặt cơm nào',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 80)),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+        body: _isHR
+            ? TabBarView(
+                controller: _tabController,
+                children: [_buildMyMealsView(), _buildOverviewView()],
+              )
+            : _buildMyMealsView(),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => _showMealFormSheet(context),
-          backgroundColor: Colors.orange.shade700,
+          backgroundColor: Colors.blue.shade700,
           foregroundColor: Colors.white,
           icon: const Icon(Icons.add),
           label: const Text(
@@ -135,6 +95,583 @@ class _MealPageState extends State<MealPage> {
           ),
         ),
       ),
+    );
+  }
+
+  // --- HR Overview View ---
+  Widget _buildOverviewView() {
+    return BlocBuilder<MealCubit, MealState>(
+      builder: (context, state) {
+        final filteredMeals = _getMealsForDay(
+          state.allRegistrations,
+          _overviewDate,
+        );
+        return RefreshIndicator(
+          onRefresh: () => _cubit.loadAllRegistrations(),
+          child: Column(
+            children: [
+              _buildCustomCalendarHeader(),
+              _buildCalendarRibbon(state.allRegistrations),
+              if (state.status == BaseStatus.error)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  color: Colors.red.shade50,
+                  width: double.infinity,
+                  child: Text(
+                    'Lỗi: ${state.errorMessage}',
+                    style: TextStyle(color: Colors.red.shade700),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              Expanded(
+                child:
+                    state.status == BaseStatus.loading &&
+                        state.allRegistrations.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : Column(
+                        children: [
+                          _buildSummaryCard(filteredMeals),
+                          Expanded(child: _buildOverviewList(filteredMeals)),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCalendarRibbon(List<MealModel> allMeals) {
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 2,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
+      ),
+      child: TableCalendar(
+        headerVisible: false,
+        firstDay: DateTime(2020),
+        lastDay: DateTime(2030),
+        focusedDay: _focusedDay,
+        calendarFormat: CalendarFormat.week,
+        availableCalendarFormats: const {CalendarFormat.week: 'Week'},
+        locale: 'vi',
+        rowHeight: 110,
+        daysOfWeekHeight: 40,
+        daysOfWeekStyle: DaysOfWeekStyle(
+          weekdayStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: Colors.grey.shade700,
+          ),
+          weekendStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: Colors.redAccent,
+          ),
+        ),
+        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+        onDaySelected: (selectedDay, focusedDay) {
+          setState(() {
+            _selectedDay = selectedDay;
+            _focusedDay = focusedDay;
+            _overviewDate = selectedDay;
+          });
+        },
+        onPageChanged: (focusedDay) {
+          setState(() => _focusedDay = focusedDay);
+        },
+        calendarBuilders: CalendarBuilders(
+          dowBuilder: (context, day) {
+            final text = DateFormat.E('vi').format(day);
+            return Center(
+              child: Text(
+                text,
+                style: TextStyle(
+                  color: day.weekday == DateTime.sunday
+                      ? Colors.redAccent
+                      : Colors.grey.shade700,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            );
+          },
+          defaultBuilder: (context, day, focusedDay) => _buildWeekDayCell(
+            day,
+            allMeals,
+            isSelected: false,
+            isToday: false,
+          ),
+          todayBuilder: (context, day, focusedDay) => _buildWeekDayCell(
+            day,
+            allMeals,
+            isSelected: false,
+            isToday: true,
+          ),
+          selectedBuilder: (context, day, focusedDay) => _buildWeekDayCell(
+            day,
+            allMeals,
+            isSelected: true,
+            isToday: false,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomCalendarHeader() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              DateFormat.yMMMM('vi').format(_focusedDay).toUpperCase(),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue.shade700,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Row(
+            children: [
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _focusedDay = DateTime.now();
+                    _selectedDay = DateTime.now();
+                    _overviewDate = DateTime.now();
+                  });
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    AppStrings.today,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _buildNavBtn(
+                Icons.chevron_left,
+                () => setState(() {
+                  _focusedDay = _focusedDay.subtract(const Duration(days: 7));
+                }),
+              ),
+              const SizedBox(width: 8),
+              _buildNavBtn(
+                Icons.chevron_right,
+                () => setState(() {
+                  _focusedDay = _focusedDay.add(const Duration(days: 7));
+                }),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavBtn(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 20, color: Colors.black87),
+      ),
+    );
+  }
+
+  Widget _buildWeekDayCell(
+    DateTime day,
+    List<MealModel> allMeals, {
+    required bool isSelected,
+    required bool isToday,
+  }) {
+    final dayMeals = _getMealsForDay(allMeals, day);
+    final count = dayMeals.length;
+    final isWeekend =
+        day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
+
+    Color dayNumColor;
+    Color bgColor;
+    Color borderColor;
+    if (isSelected) {
+      bgColor = Colors.blue.shade700;
+      dayNumColor = Colors.white;
+      borderColor = Colors.blue.shade700;
+    } else if (isToday) {
+      bgColor = Colors.blue.shade50;
+      dayNumColor = Colors.blue.shade800;
+      borderColor = Colors.blue.shade300;
+    } else if (isWeekend) {
+      bgColor = Colors.grey.shade50;
+      dayNumColor = Colors.grey.shade400;
+      borderColor = Colors.transparent;
+    } else {
+      bgColor = Colors.transparent;
+      dayNumColor = Colors.black87;
+      borderColor = Colors.transparent;
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '${day.day}',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: dayNumColor,
+            ),
+          ),
+          const SizedBox(height: 4),
+          _buildShiftBadge(
+            label: 'Trưa',
+            count: count,
+            color: Colors.blue.shade600,
+            bgColor: Colors.blue.shade50,
+            isSelected: isSelected,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShiftBadge({
+    required String label,
+    required int count,
+    required Color color,
+    required Color bgColor,
+    required bool isSelected,
+  }) {
+    final hasMark = count > 0;
+    final bColor = !hasMark
+        ? (isSelected ? Colors.white.withOpacity(0.1) : Colors.grey.shade100)
+        : (isSelected ? Colors.white.withOpacity(0.25) : bgColor);
+
+    final lColor = !hasMark
+        ? (isSelected ? Colors.white24 : Colors.grey.shade300)
+        : (isSelected ? Colors.white : color);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      height: 28,
+      decoration: BoxDecoration(
+        color: bColor,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Center(
+        child: Text(
+          hasMark ? '$count' : label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: lColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<MealModel> _getMealsForDay(List<MealModel> meals, DateTime day) {
+    return meals.where((m) {
+      final date = DateTime(day.year, day.month, day.day);
+      final start = DateTime(
+        m.startDate.year,
+        m.startDate.month,
+        m.startDate.day,
+      );
+      final end = m.endDate != null
+          ? DateTime(m.endDate!.year, m.endDate!.month, m.endDate!.day)
+          : start;
+
+      bool isInRange =
+          (date.isAtSameMomentAs(start) ||
+          (date.isAfter(start) &&
+              date.isBefore(end.add(const Duration(days: 1)))) ||
+          date.isAtSameMomentAs(end));
+
+      if (!isInRange) return false;
+
+      if (m.isRecurring) {
+        return m.weekdays.any((w) => w.weekdayNumber == day.weekday);
+      }
+
+      return true;
+    }).toList();
+  }
+
+  Widget _buildSummaryCard(List<MealModel> items) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade700,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tổng suất cơm cần đặt',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Hôm nay',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '${items.length}',
+              style: TextStyle(
+                color: Colors.blue.shade700,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOverviewList(List<MealModel> items) {
+    if (items.isEmpty) {
+      return Center(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.no_meals_outlined,
+                size: 64,
+                color: Colors.grey.shade300,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Không có ai đăng ký cơm ngày này',
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Thử chọn ngày khác hoặc kéo xuống để tải lại',
+                style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final meal = items[index];
+        final name = meal.userMetadata?['name'] ?? 'Ẩn danh';
+        return Card(
+          elevation: 0,
+          margin: const EdgeInsets.only(bottom: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey.shade200),
+          ),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.blue.shade50,
+              child: Text(
+                name.isNotEmpty ? name[0].toUpperCase() : '?',
+                style: TextStyle(
+                  color: Colors.blue.shade700,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            title: Text(
+              name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              meal.isRecurring ? 'Đăng ký lặp lại' : 'Đăng ký một lần',
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (meal.note != null && meal.note!.isNotEmpty)
+                  Tooltip(
+                    message: meal.note,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Icon(
+                        Icons.note,
+                        size: 18,
+                        color: Colors.blue.shade400,
+                      ),
+                    ),
+                  ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                  onPressed: () => _confirmDelete(context, meal.id),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // --- My Meals View ---
+  Widget _buildMyMealsView() {
+    return BlocConsumer<MealCubit, MealState>(
+      listener: (context, state) {
+        if (state.submitStatus == BaseStatus.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Thành công!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (state.submitStatus == BaseStatus.error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage ?? 'Thất bại'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        return RefreshIndicator(
+          onRefresh: () => _cubit.loadMeals(),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 700),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: _buildRegisterCard(context, state),
+                    ),
+                  ),
+                  if (state.meals.isNotEmpty) ...[
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: Text(
+                          'Lịch đăng ký của bạn',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) =>
+                            _buildMealCard(context, state.meals[index]),
+                        childCount: state.meals.length,
+                      ),
+                    ),
+                  ] else if (state.status == BaseStatus.success)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(40),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.rice_bowl_outlined,
+                              size: 60,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Chưa có lịch đặt cơm nào',
+                              style: TextStyle(color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 80)),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -152,12 +689,12 @@ class _MealPageState extends State<MealPage> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
+                    color: Colors.blue.shade50,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.rice_bowl,
-                    color: Colors.orange.shade700,
+                    color: Colors.blue.shade700,
                     size: 28,
                   ),
                 ),
@@ -167,7 +704,7 @@ class _MealPageState extends State<MealPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Đăng ký suất cơm',
+                        'Đăng ký cơm trưa',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -193,7 +730,7 @@ class _MealPageState extends State<MealPage> {
                 icon: const Icon(Icons.add),
                 label: const Text('Đăng ký ngay'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange.shade700,
+                  backgroundColor: Colors.blue.shade700,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -234,12 +771,12 @@ class _MealPageState extends State<MealPage> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.orange.shade50,
+                color: Colors.blue.shade50,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 isRecurring ? Icons.repeat : Icons.event,
-                color: Colors.orange.shade700,
+                color: Colors.blue.shade700,
               ),
             ),
             const SizedBox(width: 14),
@@ -260,7 +797,7 @@ class _MealPageState extends State<MealPage> {
                       meal.weekdays.map((w) => w.displayName).join(', '),
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.orange.shade700,
+                        color: Colors.blue.shade700,
                         fontWeight: FontWeight.w600,
                       ),
                     )
@@ -291,31 +828,6 @@ class _MealPageState extends State<MealPage> {
                 ],
               ),
             ),
-            if (isRecurring)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.shade200),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.repeat, size: 12, color: Colors.orange.shade700),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Hàng tuần',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.orange.shade700,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            const SizedBox(width: 8),
             IconButton(
               onPressed: () => _confirmDelete(context, meal.id),
               icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -340,7 +852,10 @@ class _MealPageState extends State<MealPage> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(ctx);
-              _cubit.deleteMeal(id);
+              _cubit.deleteMeal(id).then((_) {
+                // If HR, reload overview after deleting
+                if (_isHR) _cubit.loadMealOverview(_overviewDate);
+              });
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Xóa', style: TextStyle(color: Colors.white)),
@@ -369,7 +884,7 @@ class _MealFormSheet extends StatefulWidget {
 }
 
 class _MealFormSheetState extends State<_MealFormSheet> {
-  MealShift _selectedShift = MealShift.BOTH;
+  final MealShift _selectedShift = MealShift.LUNCH;
   bool _isRecurring = true;
   final Set<MealWeekday> _selectedWeekdays = {
     MealWeekday.MONDAY,
@@ -391,9 +906,9 @@ class _MealFormSheetState extends State<_MealFormSheet> {
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.85,
+      initialChildSize: 0.7,
       maxChildSize: 0.95,
-      minChildSize: 0.5,
+      minChildSize: 0.4,
       builder: (_, controller) => Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -401,7 +916,6 @@ class _MealFormSheetState extends State<_MealFormSheet> {
         ),
         child: Column(
           children: [
-            // Handle bar
             const SizedBox(height: 12),
             Container(
               width: 40,
@@ -413,7 +927,7 @@ class _MealFormSheetState extends State<_MealFormSheet> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Đăng ký cơm',
+              'Đăng ký cơm trưa',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const Divider(),
@@ -422,50 +936,15 @@ class _MealFormSheetState extends State<_MealFormSheet> {
                 controller: controller,
                 padding: const EdgeInsets.all(20),
                 children: [
-                  // Ca ăn
                   const Text(
-                    'Ca ăn',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: MealShift.values.map((shift) {
-                      final selected = _selectedShift == shift;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _selectedShift = shift),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: selected
-                                  ? Colors.orange.shade700
-                                  : Colors.orange.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: selected
-                                    ? Colors.orange.shade700
-                                    : Colors.orange.shade200,
-                              ),
-                            ),
-                            child: Text(
-                              shift.displayName,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: selected
-                                    ? Colors.white
-                                    : Colors.orange.shade700,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                    'Bạn đang đăng ký cơm cho buổi trưa',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Toggle lặp lại
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -479,15 +958,14 @@ class _MealFormSheetState extends State<_MealFormSheet> {
                       Switch(
                         value: _isRecurring,
                         onChanged: (v) => setState(() => _isRecurring = v),
-                        activeColor: Colors.orange.shade700,
+                        activeColor: Colors.blue.shade700,
                       ),
                     ],
                   ),
-
                   if (_isRecurring) ...[
                     const SizedBox(height: 12),
                     const Text(
-                      'Chọn thứ (Thứ 2 – Thứ 6)',
+                      'Chọn các thứ trong tuần',
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const SizedBox(height: 8),
@@ -500,14 +978,13 @@ class _MealFormSheetState extends State<_MealFormSheet> {
                           selected: selected,
                           onSelected: (val) {
                             setState(() {
-                              if (val) {
+                              if (val)
                                 _selectedWeekdays.add(day);
-                              } else {
+                              else
                                 _selectedWeekdays.remove(day);
-                              }
                             });
                           },
-                          selectedColor: Colors.orange.shade700,
+                          selectedColor: Colors.indigo.shade700,
                           labelStyle: TextStyle(
                             color: selected ? Colors.white : Colors.black87,
                             fontWeight: FontWeight.w600,
@@ -518,24 +995,20 @@ class _MealFormSheetState extends State<_MealFormSheet> {
                     ),
                   ],
                   const SizedBox(height: 20),
-
-                  // Ngày bắt đầu
                   _buildDatePicker(
-                    'Từ ngày',
+                    _isRecurring ? 'Từ ngày' : 'Ngày đăng ký',
                     _startDate,
                     (date) => setState(() => _startDate = date),
                   ),
-                  const SizedBox(height: 12),
-
-                  // Ngày kết thúc
-                  _buildDatePicker(
-                    'Đến ngày',
-                    _endDate,
-                    (date) => setState(() => _endDate = date),
-                  ),
+                  if (_isRecurring) ...[
+                    const SizedBox(height: 12),
+                    _buildDatePicker(
+                      'Đến ngày',
+                      _endDate,
+                      (date) => setState(() => _endDate = date),
+                    ),
+                  ],
                   const SizedBox(height: 16),
-
-                  // Ghi chú
                   TextField(
                     controller: _noteController,
                     decoration: InputDecoration(
@@ -548,10 +1021,7 @@ class _MealFormSheetState extends State<_MealFormSheet> {
                     maxLines: 2,
                   ),
                   const SizedBox(height: 24),
-
-                  // Nút gửi
                   BlocBuilder<MealCubit, MealState>(
-                    buildWhen: (p, c) => p.submitStatus != c.submitStatus,
                     builder: (context, state) {
                       return SizedBox(
                         width: double.infinity,
@@ -561,7 +1031,7 @@ class _MealFormSheetState extends State<_MealFormSheet> {
                               ? null
                               : () => _submit(context),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange.shade700,
+                            backgroundColor: Colors.blue.shade700,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
@@ -629,7 +1099,7 @@ class _MealFormSheetState extends State<_MealFormSheet> {
               DateFormat('dd/MM/yyyy').format(currentDate),
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
-            const Icon(Icons.calendar_today, size: 18),
+            Icon(Icons.calendar_today, size: 18, color: Colors.indigo.shade300),
           ],
         ),
       ),
@@ -638,27 +1108,29 @@ class _MealFormSheetState extends State<_MealFormSheet> {
 
   void _submit(BuildContext context) {
     if (_isRecurring && _selectedWeekdays.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng chọn ít nhất 1 ngày trong tuần'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Chọn ít nhất 1 thứ')));
       return;
     }
+    final note = _noteController.text.trim();
+
+    // If not recurring, end date should be same as start date
+    final finalEndDate = _isRecurring ? _endDate : _startDate;
 
     final data = {
       'shift': _selectedShift.name,
       'isRecurring': _isRecurring,
-      'weekdays': _selectedWeekdays.map((w) => w.name).toList(),
+      'weekdays': _isRecurring
+          ? _selectedWeekdays.map((w) => w.name).toList()
+          : [],
       'startDate': _startDate.toIso8601String(),
-      'endDate': _endDate.toIso8601String(),
-      'note': _noteController.text.trim(),
+      'endDate': finalEndDate.toIso8601String(),
+      'note': note,
     };
 
     context.read<MealCubit>().submitMeal(data).then((success) {
-      if (success && mounted) {
-        Navigator.pop(context);
-      }
+      if (success && mounted) Navigator.pop(context);
     });
   }
 }

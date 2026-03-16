@@ -32,6 +32,7 @@ class AnnouncementCubit extends Cubit<AnnouncementState> {
       emit(
         state.copyWith(
           submitStatus: BaseStatus.success,
+          successMessage: 'Đã đăng thông báo thành công!',
           announcements: [newItem, ...state.announcements],
         ),
       );
@@ -51,5 +52,31 @@ class AnnouncementCubit extends Cubit<AnnouncementState> {
     try {
       await _repo.markSeen(id);
     } catch (_) {}
+  }
+
+  Future<void> deleteAnnouncement(String id) async {
+    emit(state.copyWith(submitStatus: BaseStatus.loading));
+    try {
+      print('DEBUG: Deleting announcement with ID: $id');
+      await _repo.deleteAnnouncement(id);
+      final newItems = state.announcements
+          .where((element) => element.id != id)
+          .toList();
+      emit(
+        state.copyWith(
+          announcements: newItems,
+          submitStatus: BaseStatus.success,
+          successMessage: '🗑️ Đã xóa thông báo khỏi hệ thống!',
+        ),
+      );
+    } catch (e) {
+      print('DEBUG: Error deleting announcement: $e');
+      emit(
+        state.copyWith(
+          submitStatus: BaseStatus.error,
+          errorMessage: 'Xóa thông báo thất bại: $e',
+        ),
+      );
+    }
   }
 }

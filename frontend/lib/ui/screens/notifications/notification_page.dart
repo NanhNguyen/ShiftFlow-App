@@ -538,11 +538,30 @@ class _NotificationPageState extends State<NotificationPage> {
               _notifCubit.markAsRead(notification.id);
               getIt<HomeCubit>().loadData();
             }
-            if (isManagerOrHR) {
-              context.router.push(const ManagerRequestRoute());
+
+            if (notification.type == 'ANNOUNCEMENT') {
+              // Navigate to Announcement Tab
+              final role =
+                  getIt<AuthService>().currentUser?.role ?? UserRole.INTERN;
+              if (role == UserRole.HR) {
+                getIt<MainCubit>().setIndex(
+                  4,
+                ); // HR: index 4 is AnnouncementPage
+              } else if (role == UserRole.MANAGER) {
+                // Manager doesn't have announcement tab currently,
+                // but let's assume they should go to notifications or we'll add it later.
+                // For now, if no tab, just stay here or pop.
+              } else {
+                // INTERN/EMPLOYEE: index 4 is AnnouncementPage
+                getIt<MainCubit>().setIndex(4);
+              }
             } else {
-              getIt<MainCubit>().setIndex(2);
-              context.router.popUntilRoot();
+              if (isManagerOrHR) {
+                context.router.push(const ManagerRequestRoute());
+              } else {
+                getIt<MainCubit>().setIndex(2); // Schedule
+                context.router.popUntilRoot();
+              }
             }
           },
           child: Padding(
@@ -650,6 +669,8 @@ class _NotificationPageState extends State<NotificationPage> {
         return Icons.check_circle_outline;
       case 'REQUEST_REJECTED':
         return Icons.cancel_outlined;
+      case 'ANNOUNCEMENT':
+        return Icons.campaign;
       default:
         return Icons.notifications_outlined;
     }
@@ -663,6 +684,8 @@ class _NotificationPageState extends State<NotificationPage> {
         return Colors.green;
       case 'REQUEST_REJECTED':
         return Colors.red;
+      case 'ANNOUNCEMENT':
+        return Colors.blue;
       default:
         return Colors.grey;
     }

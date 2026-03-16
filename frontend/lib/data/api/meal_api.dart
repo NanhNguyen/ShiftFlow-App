@@ -19,4 +19,16 @@ class MealApi {
   Future<Response> deleteMeal(String id) {
     return _apiClient.delete('/meals/$id');
   }
+
+  Future<Response> getOverview(DateTime date) {
+    final dateStr = date.toIso8601String().split('T')[0];
+    return _apiClient.get(
+      '/meals/overview',
+      queryParameters: {'date': dateStr},
+    );
+  }
+
+  Future<Response> getAllMeals() {
+    return _apiClient.get('/meals/all');
+  }
 }

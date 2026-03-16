@@ -2,10 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export enum MealShift {
-    MORNING = 'MORNING',
-    AFTERNOON = 'AFTERNOON',
-    BOTH = 'BOTH',
+    LUNCH = 'LUNCH',
 }
+
 
 export enum MealWeekday {
     MONDAY = 'MONDAY',

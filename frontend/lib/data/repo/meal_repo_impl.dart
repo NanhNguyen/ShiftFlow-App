@@ -26,4 +26,18 @@ class MealRepoImpl implements MealRepo {
   Future<void> deleteMeal(String id) async {
     await _mealApi.deleteMeal(id);
   }
+
+  @override
+  Future<List<MealModel>> getOverview(DateTime date) async {
+    final response = await _mealApi.getOverview(date);
+    final List<dynamic> data = response.data;
+    return data.map((json) => MealModel.fromJson(json)).toList();
+  }
+
+  @override
+  Future<List<MealModel>> getAllMeals() async {
+    final response = await _mealApi.getAllMeals();
+    final List<dynamic> data = response.data;
+    return data.map((json) => MealModel.fromJson(json)).toList();
+  }
 }

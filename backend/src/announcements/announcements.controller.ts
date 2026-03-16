@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { AnnouncementsService } from './announcements.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -32,4 +32,13 @@ export class AnnouncementsController {
     async markSeen(@Request() req: any, @Param('id') id: string) {
         return this.announcementsService.markSeen(id, req.user._id.toString());
     }
+
+    // HR: xóa bài thông báo
+    @Delete(':id')
+    @Roles(UserRole.HR)
+    async remove(@Param('id') id: string) {
+        console.log('HR deleting announcement:', id);
+        return this.announcementsService.remove(id);
+    }
+
 }

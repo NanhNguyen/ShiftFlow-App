@@ -4,4 +4,6 @@ abstract class MealRepo {
   Future<List<MealModel>> getMyMeals();
   Future<MealModel> createMeal(Map<String, dynamic> data);
   Future<void> deleteMeal(String id);
+  Future<List<MealModel>> getOverview(DateTime date);
+  Future<List<MealModel>> getAllMeals();
 }

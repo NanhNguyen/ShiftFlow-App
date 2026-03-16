@@ -115,4 +115,16 @@ export class UsersService {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await this.userModel.findByIdAndUpdate(id, { password_hash: hashedPassword }).exec();
     }
+
+    async addPushSubscription(userId: string, subscription: any): Promise<void> {
+        await this.userModel.findByIdAndUpdate(userId, {
+            $addToSet: { pushSubscriptions: subscription },
+        }).exec();
+    }
+
+    async removePushSubscription(userId: string, endpoint: string): Promise<void> {
+        await this.userModel.findByIdAndUpdate(userId, {
+            $pull: { pushSubscriptions: { endpoint } },
+        }).exec();
+    }
 }

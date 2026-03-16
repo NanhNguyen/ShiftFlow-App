@@ -77,12 +77,12 @@ class _SchedulePageState extends State<SchedulePage> {
                     labelStyle: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      fontSize: 18, // Increased from default
+                      fontSize: 14,
                     ),
                     unselectedLabelStyle: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white60,
-                      fontSize: 17, // Increased from default
+                      fontSize: 13,
                     ),
                     tabs: [
                       Tab(text: AppStrings.recurringLeave),
@@ -350,14 +350,18 @@ class _SchedulePageState extends State<SchedulePage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            DateFormat.yMMMM('vi').format(_focusedDay).toUpperCase(),
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.blueAccent,
+          Expanded(
+            child: Text(
+              DateFormat.yMMMM('vi').format(_focusedDay).toUpperCase(),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueAccent,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
+          const SizedBox(width: 8),
           Row(
             children: [
               InkWell(
@@ -370,15 +374,15 @@ class _SchedulePageState extends State<SchedulePage> {
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                    horizontal: 12,
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
-                    'Today',
+                    AppStrings.today,
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                 ),
@@ -458,12 +462,12 @@ class _SchedulePageState extends State<SchedulePage> {
         controller: _searchController,
         onChanged: (value) => setState(() => _filterEmployee = value),
         decoration: InputDecoration(
-          hintText: 'Tìm theo tên thực tập sinh...',
-          hintStyle: TextStyle(fontSize: 18, color: Colors.grey.shade400),
+          hintText: 'Tìm theo tên...',
+          hintStyle: TextStyle(fontSize: 16, color: Colors.grey.shade400),
           prefixIcon: Icon(
             Icons.person_search_rounded,
             color: Colors.blue.shade500,
-            size: 30, // Increased
+            size: 24,
           ),
           suffixIcon: _filterEmployee.isNotEmpty
               ? IconButton(
@@ -590,8 +594,7 @@ class _SchedulePageState extends State<SchedulePage> {
               margin: const EdgeInsets.symmetric(horizontal: 6),
               color: dividerColor,
             ),
-            const SizedBox(height: 8),
-            // Always render shift rows (SizedBox.shrink when count = 0)
+            const SizedBox(height: 6),
             _buildShiftBadge(
               label: 'SA',
               count: hasSchedules ? morningCount : 0,
@@ -600,7 +603,7 @@ class _SchedulePageState extends State<SchedulePage> {
               isSelected: isSelected,
               isEmpty: !hasSchedules,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             _buildShiftBadge(
               label: 'CH',
               count: hasSchedules ? afternoonCount : 0,
@@ -637,10 +640,10 @@ class _SchedulePageState extends State<SchedulePage> {
         : (isSelected ? Colors.white : color);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Container(
         width: double.infinity,
-        height: 36,
+        height: 32,
         decoration: BoxDecoration(
           color: badgeColor,
           borderRadius: BorderRadius.circular(8),
@@ -655,7 +658,7 @@ class _SchedulePageState extends State<SchedulePage> {
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: labelColor,
                 ),
@@ -667,7 +670,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 child: Text(
                   '$count',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 11,
                     fontWeight: FontWeight.w900,
                     color: isSelected ? Colors.white : color,
                   ),
@@ -863,6 +866,7 @@ class _SchedulePageState extends State<SchedulePage> {
             Text(
               '${AppStrings.noSchedulesFor} ${DateFormat('EEEE, d/M', 'vi').format(_selectedDay ?? _focusedDay)}',
               style: TextStyle(color: Colors.grey.shade600),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

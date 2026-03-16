@@ -53,4 +53,28 @@ class MealCubit extends Cubit<MealState> {
       emit(state.copyWith(errorMessage: 'Không thể xóa: $e'));
     }
   }
+
+  Future<void> loadMealOverview(DateTime date) async {
+    emit(state.copyWith(status: BaseStatus.loading));
+    try {
+      final overview = await _mealRepo.getOverview(date);
+      emit(state.copyWith(status: BaseStatus.success, overviewMeals: overview));
+    } catch (e) {
+      emit(
+        state.copyWith(status: BaseStatus.error, errorMessage: e.toString()),
+      );
+    }
+  }
+
+  Future<void> loadAllRegistrations() async {
+    emit(state.copyWith(status: BaseStatus.loading));
+    try {
+      final all = await _mealRepo.getAllMeals();
+      emit(state.copyWith(status: BaseStatus.success, allRegistrations: all));
+    } catch (e) {
+      emit(
+        state.copyWith(status: BaseStatus.error, errorMessage: e.toString()),
+      );
+    }
+  }
 }

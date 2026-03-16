@@ -23,17 +23,20 @@ MealModel _$MealModelFromJson(Map<String, dynamic> json) {
 mixin _$MealModel {
   @JsonKey(name: '_id')
   String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'userId', readValue: _readUserId)
   String get userId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_metadata', readValue: _readUserMetadata)
+  Map<String, dynamic>? get userMetadata => throw _privateConstructorUsedError;
   MealShift get shift => throw _privateConstructorUsedError;
   bool get isRecurring => throw _privateConstructorUsedError;
   List<MealWeekday> get weekdays => throw _privateConstructorUsedError;
-  @JsonKey(name: 'startDate')
+  @JsonKey(name: 'startDate', readValue: _readDate)
   DateTime get startDate => throw _privateConstructorUsedError;
-  @JsonKey(name: 'endDate')
+  @JsonKey(name: 'endDate', readValue: _readDate)
   DateTime? get endDate => throw _privateConstructorUsedError;
   List<DateTime> get specificDates => throw _privateConstructorUsedError;
   String? get note => throw _privateConstructorUsedError;
-  @JsonKey(name: 'createdAt')
+  @JsonKey(name: 'createdAt', readValue: _readDate)
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this MealModel to a JSON map.
@@ -53,15 +56,17 @@ abstract class $MealModelCopyWith<$Res> {
   @useResult
   $Res call({
     @JsonKey(name: '_id') String id,
-    String userId,
+    @JsonKey(name: 'userId', readValue: _readUserId) String userId,
+    @JsonKey(name: 'user_metadata', readValue: _readUserMetadata)
+    Map<String, dynamic>? userMetadata,
     MealShift shift,
     bool isRecurring,
     List<MealWeekday> weekdays,
-    @JsonKey(name: 'startDate') DateTime startDate,
-    @JsonKey(name: 'endDate') DateTime? endDate,
+    @JsonKey(name: 'startDate', readValue: _readDate) DateTime startDate,
+    @JsonKey(name: 'endDate', readValue: _readDate) DateTime? endDate,
     List<DateTime> specificDates,
     String? note,
-    @JsonKey(name: 'createdAt') DateTime? createdAt,
+    @JsonKey(name: 'createdAt', readValue: _readDate) DateTime? createdAt,
   });
 }
 
@@ -82,6 +87,7 @@ class _$MealModelCopyWithImpl<$Res, $Val extends MealModel>
   $Res call({
     Object? id = null,
     Object? userId = null,
+    Object? userMetadata = freezed,
     Object? shift = null,
     Object? isRecurring = null,
     Object? weekdays = null,
@@ -101,6 +107,10 @@ class _$MealModelCopyWithImpl<$Res, $Val extends MealModel>
                 ? _value.userId
                 : userId // ignore: cast_nullable_to_non_nullable
                       as String,
+            userMetadata: freezed == userMetadata
+                ? _value.userMetadata
+                : userMetadata // ignore: cast_nullable_to_non_nullable
+                      as Map<String, dynamic>?,
             shift: null == shift
                 ? _value.shift
                 : shift // ignore: cast_nullable_to_non_nullable
@@ -150,15 +160,17 @@ abstract class _$$MealModelImplCopyWith<$Res>
   @useResult
   $Res call({
     @JsonKey(name: '_id') String id,
-    String userId,
+    @JsonKey(name: 'userId', readValue: _readUserId) String userId,
+    @JsonKey(name: 'user_metadata', readValue: _readUserMetadata)
+    Map<String, dynamic>? userMetadata,
     MealShift shift,
     bool isRecurring,
     List<MealWeekday> weekdays,
-    @JsonKey(name: 'startDate') DateTime startDate,
-    @JsonKey(name: 'endDate') DateTime? endDate,
+    @JsonKey(name: 'startDate', readValue: _readDate) DateTime startDate,
+    @JsonKey(name: 'endDate', readValue: _readDate) DateTime? endDate,
     List<DateTime> specificDates,
     String? note,
-    @JsonKey(name: 'createdAt') DateTime? createdAt,
+    @JsonKey(name: 'createdAt', readValue: _readDate) DateTime? createdAt,
   });
 }
 
@@ -178,6 +190,7 @@ class __$$MealModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? userId = null,
+    Object? userMetadata = freezed,
     Object? shift = null,
     Object? isRecurring = null,
     Object? weekdays = null,
@@ -197,6 +210,10 @@ class __$$MealModelImplCopyWithImpl<$Res>
             ? _value.userId
             : userId // ignore: cast_nullable_to_non_nullable
                   as String,
+        userMetadata: freezed == userMetadata
+            ? _value._userMetadata
+            : userMetadata // ignore: cast_nullable_to_non_nullable
+                  as Map<String, dynamic>?,
         shift: null == shift
             ? _value.shift
             : shift // ignore: cast_nullable_to_non_nullable
@@ -239,16 +256,19 @@ class __$$MealModelImplCopyWithImpl<$Res>
 class _$MealModelImpl implements _MealModel {
   const _$MealModelImpl({
     @JsonKey(name: '_id') required this.id,
-    required this.userId,
+    @JsonKey(name: 'userId', readValue: _readUserId) required this.userId,
+    @JsonKey(name: 'user_metadata', readValue: _readUserMetadata)
+    final Map<String, dynamic>? userMetadata,
     required this.shift,
     this.isRecurring = false,
     final List<MealWeekday> weekdays = const [],
-    @JsonKey(name: 'startDate') required this.startDate,
-    @JsonKey(name: 'endDate') this.endDate,
+    @JsonKey(name: 'startDate', readValue: _readDate) required this.startDate,
+    @JsonKey(name: 'endDate', readValue: _readDate) this.endDate,
     final List<DateTime> specificDates = const [],
     this.note,
-    @JsonKey(name: 'createdAt') this.createdAt,
-  }) : _weekdays = weekdays,
+    @JsonKey(name: 'createdAt', readValue: _readDate) this.createdAt,
+  }) : _userMetadata = userMetadata,
+       _weekdays = weekdays,
        _specificDates = specificDates;
 
   factory _$MealModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -258,7 +278,19 @@ class _$MealModelImpl implements _MealModel {
   @JsonKey(name: '_id')
   final String id;
   @override
+  @JsonKey(name: 'userId', readValue: _readUserId)
   final String userId;
+  final Map<String, dynamic>? _userMetadata;
+  @override
+  @JsonKey(name: 'user_metadata', readValue: _readUserMetadata)
+  Map<String, dynamic>? get userMetadata {
+    final value = _userMetadata;
+    if (value == null) return null;
+    if (_userMetadata is EqualUnmodifiableMapView) return _userMetadata;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
   @override
   final MealShift shift;
   @override
@@ -274,10 +306,10 @@ class _$MealModelImpl implements _MealModel {
   }
 
   @override
-  @JsonKey(name: 'startDate')
+  @JsonKey(name: 'startDate', readValue: _readDate)
   final DateTime startDate;
   @override
-  @JsonKey(name: 'endDate')
+  @JsonKey(name: 'endDate', readValue: _readDate)
   final DateTime? endDate;
   final List<DateTime> _specificDates;
   @override
@@ -291,12 +323,12 @@ class _$MealModelImpl implements _MealModel {
   @override
   final String? note;
   @override
-  @JsonKey(name: 'createdAt')
+  @JsonKey(name: 'createdAt', readValue: _readDate)
   final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'MealModel(id: $id, userId: $userId, shift: $shift, isRecurring: $isRecurring, weekdays: $weekdays, startDate: $startDate, endDate: $endDate, specificDates: $specificDates, note: $note, createdAt: $createdAt)';
+    return 'MealModel(id: $id, userId: $userId, userMetadata: $userMetadata, shift: $shift, isRecurring: $isRecurring, weekdays: $weekdays, startDate: $startDate, endDate: $endDate, specificDates: $specificDates, note: $note, createdAt: $createdAt)';
   }
 
   @override
@@ -306,6 +338,10 @@ class _$MealModelImpl implements _MealModel {
             other is _$MealModelImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.userId, userId) || other.userId == userId) &&
+            const DeepCollectionEquality().equals(
+              other._userMetadata,
+              _userMetadata,
+            ) &&
             (identical(other.shift, shift) || other.shift == shift) &&
             (identical(other.isRecurring, isRecurring) ||
                 other.isRecurring == isRecurring) &&
@@ -328,6 +364,7 @@ class _$MealModelImpl implements _MealModel {
     runtimeType,
     id,
     userId,
+    const DeepCollectionEquality().hash(_userMetadata),
     shift,
     isRecurring,
     const DeepCollectionEquality().hash(_weekdays),
@@ -355,15 +392,19 @@ class _$MealModelImpl implements _MealModel {
 abstract class _MealModel implements MealModel {
   const factory _MealModel({
     @JsonKey(name: '_id') required final String id,
+    @JsonKey(name: 'userId', readValue: _readUserId)
     required final String userId,
+    @JsonKey(name: 'user_metadata', readValue: _readUserMetadata)
+    final Map<String, dynamic>? userMetadata,
     required final MealShift shift,
     final bool isRecurring,
     final List<MealWeekday> weekdays,
-    @JsonKey(name: 'startDate') required final DateTime startDate,
-    @JsonKey(name: 'endDate') final DateTime? endDate,
+    @JsonKey(name: 'startDate', readValue: _readDate)
+    required final DateTime startDate,
+    @JsonKey(name: 'endDate', readValue: _readDate) final DateTime? endDate,
     final List<DateTime> specificDates,
     final String? note,
-    @JsonKey(name: 'createdAt') final DateTime? createdAt,
+    @JsonKey(name: 'createdAt', readValue: _readDate) final DateTime? createdAt,
   }) = _$MealModelImpl;
 
   factory _MealModel.fromJson(Map<String, dynamic> json) =
@@ -373,7 +414,11 @@ abstract class _MealModel implements MealModel {
   @JsonKey(name: '_id')
   String get id;
   @override
+  @JsonKey(name: 'userId', readValue: _readUserId)
   String get userId;
+  @override
+  @JsonKey(name: 'user_metadata', readValue: _readUserMetadata)
+  Map<String, dynamic>? get userMetadata;
   @override
   MealShift get shift;
   @override
@@ -381,17 +426,17 @@ abstract class _MealModel implements MealModel {
   @override
   List<MealWeekday> get weekdays;
   @override
-  @JsonKey(name: 'startDate')
+  @JsonKey(name: 'startDate', readValue: _readDate)
   DateTime get startDate;
   @override
-  @JsonKey(name: 'endDate')
+  @JsonKey(name: 'endDate', readValue: _readDate)
   DateTime? get endDate;
   @override
   List<DateTime> get specificDates;
   @override
   String? get note;
   @override
-  @JsonKey(name: 'createdAt')
+  @JsonKey(name: 'createdAt', readValue: _readDate)
   DateTime? get createdAt;
 
   /// Create a copy of MealModel

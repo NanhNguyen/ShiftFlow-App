@@ -27,9 +27,18 @@ export class MealsController {
         return this.mealsService.findAll();
     }
 
+    @Get('overview')
+    @Roles(UserRole.HR)
+    async getOverview(@Request() req: any) {
+        const date = req.query.date ? new Date(req.query.date as string) : new Date();
+        return this.mealsService.findOverview(date);
+    }
+
     @Delete(':id')
+
     @Roles(UserRole.INTERN, UserRole.EMPLOYEE)
     async remove(@Request() req: any, @Param('id') id: string) {
-        return this.mealsService.remove(id, req.user._id.toString());
+        return this.mealsService.remove(id, req.user._id.toString(), req.user.role);
     }
+
 }

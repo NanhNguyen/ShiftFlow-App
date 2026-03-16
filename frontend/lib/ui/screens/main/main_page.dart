@@ -151,14 +151,18 @@ class _MainPageState extends State<MainPage> {
                                             vertical: 4,
                                           ),
                                       onTap: () {
-                                        _mainCubit.setIndex(index);
-                                        if (_isScheduleIndex(index)) {
+                                        final pageIndex = _getPageIndexFromNav(
+                                          index,
+                                        );
+                                        _mainCubit.setIndex(pageIndex);
+                                        if (_isScheduleIndex(pageIndex)) {
                                           getIt<ScheduleCubit>().loadSchedules(
                                             _userRole,
                                           );
                                           getIt<ScheduleCubit>().resetDate();
                                         }
-                                        if (index == _getNotificationIndex()) {
+                                        if (pageIndex ==
+                                            _getNotificationIndex(_userRole)) {
                                           _notifCubit.markAllAsRead();
                                           getIt<HomeCubit>().loadData();
                                         }
@@ -182,29 +186,54 @@ class _MainPageState extends State<MainPage> {
                   ),
                   bottomNavigationBar: isWideScreen
                       ? null
-                      : BottomNavigationBar(
-                          currentIndex: state.currentIndex,
-                          onTap: (index) {
-                            _mainCubit.setIndex(index);
-                            if (_isScheduleIndex(index)) {
-                              getIt<ScheduleCubit>().loadSchedules(_userRole);
-                              getIt<ScheduleCubit>().resetDate();
-                            }
-                            if (index == _getNotificationIndex(_userRole)) {
-                              _notifCubit.markAllAsRead();
-                              getIt<HomeCubit>().loadData();
-                            }
-                          },
-                          type: BottomNavigationBarType.fixed,
-                          selectedItemColor: _selectedColor,
-                          unselectedItemColor: Colors.grey,
-                          iconSize: 30,
-                          selectedLabelStyle: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                      : Container(
+                          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
                           ),
-                          unselectedLabelStyle: const TextStyle(fontSize: 13),
-                          items: currentNavItems,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: BottomNavigationBar(
+                              currentIndex: _getNavIndexFromPage(
+                                state.currentIndex,
+                              ),
+                              onTap: (index) {
+                                final pageIndex = _getPageIndexFromNav(index);
+                                _mainCubit.setIndex(pageIndex);
+                                if (_isScheduleIndex(pageIndex)) {
+                                  getIt<ScheduleCubit>().loadSchedules(
+                                    _userRole,
+                                  );
+                                  getIt<ScheduleCubit>().resetDate();
+                                }
+                                if (pageIndex ==
+                                    _getNotificationIndex(_userRole)) {
+                                  _notifCubit.markAllAsRead();
+                                  getIt<HomeCubit>().loadData();
+                                }
+                              },
+                              type: BottomNavigationBarType.fixed,
+                              selectedItemColor: _selectedColor,
+                              unselectedItemColor: Colors.grey,
+                              showSelectedLabels: false,
+                              showUnselectedLabels: false,
+                              iconSize: 28,
+                              selectedLabelStyle: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              unselectedLabelStyle: const TextStyle(
+                                fontSize: 12,
+                              ),
+                              items: currentNavItems,
+                            ),
+                          ),
                         ),
                 ),
               );
@@ -220,25 +249,11 @@ class _MainPageState extends State<MainPage> {
     BuildContext context,
     int unreadNotifCount,
   ) {
-    final pendingCount = context.watch<HomeCubit>().state.pendingCount;
     return [
       const BottomNavigationBarItem(
         icon: Icon(Icons.home_outlined),
         activeIcon: Icon(Icons.home),
         label: AppStrings.home,
-      ),
-      BottomNavigationBarItem(
-        icon: _withBadge(
-          Icons.admin_panel_settings_outlined,
-          pendingCount,
-          active: false,
-        ),
-        activeIcon: _withBadge(
-          Icons.admin_panel_settings,
-          pendingCount,
-          active: true,
-        ),
-        label: AppStrings.manage,
       ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.calendar_month_outlined),
@@ -313,6 +328,7 @@ class _MainPageState extends State<MainPage> {
       case UserRole.HR:
         return [
           const HomePage(),
+          const MealPage(),
           const SchedulePage(),
           const AccountsPage(),
           const AnnouncementPage(),
@@ -326,6 +342,7 @@ class _MainPageState extends State<MainPage> {
           const MealPage(),
           const SchedulePage(),
           const StatusPage(),
+          const AnnouncementPage(),
           const NotificationPage(),
           const ProfilePage(),
         ];
@@ -336,7 +353,7 @@ class _MainPageState extends State<MainPage> {
     switch (_userRole) {
       case UserRole.MANAGER:
         return _getManagerNavItemsWithBadge(context, unreadCount);
-      case UserRole.HR:
+      default:
         return [
           const BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
@@ -347,57 +364,6 @@ class _MainPageState extends State<MainPage> {
             icon: Icon(Icons.calendar_month_outlined),
             activeIcon: Icon(Icons.calendar_month),
             label: AppStrings.schedule,
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.group_add_outlined),
-            activeIcon: Icon(Icons.group_add),
-            label: 'Tài khoản',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.campaign_outlined),
-            activeIcon: Icon(Icons.campaign),
-            label: 'Thông báo',
-          ),
-          BottomNavigationBarItem(
-            icon: _withBadge(
-              Icons.notifications_outlined,
-              unreadCount,
-              active: false,
-            ),
-            activeIcon: _withBadge(
-              Icons.notifications,
-              unreadCount,
-              active: true,
-            ),
-            label: AppStrings.notifications,
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: AppStrings.profile,
-          ),
-        ];
-      default: // INTERN
-        return [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: AppStrings.home,
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.rice_bowl_outlined),
-            activeIcon: Icon(Icons.rice_bowl),
-            label: 'Đặt cơm',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
-            activeIcon: Icon(Icons.calendar_month),
-            label: AppStrings.schedule,
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.assignment_outlined),
-            activeIcon: Icon(Icons.assignment),
-            label: AppStrings.status,
           ),
           BottomNavigationBarItem(
             icon: _withBadge(
@@ -421,27 +387,37 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  bool _isScheduleIndex(int index) {
-    switch (_userRole) {
-      case UserRole.MANAGER:
-        return index == 2;
-      case UserRole.HR:
-        return index == 1;
-      default: // INTERN
-        return index == 2; // Shifted: 0=Home, 1=Meal, 2=Schedule
+  int _getPageIndexFromNav(int navIndex) {
+    if (navIndex == 0) return 0; // Home
+    if (navIndex == 1) return 2; // Schedule (universal index 2)
+    if (_userRole == UserRole.MANAGER) {
+      if (navIndex == 2) return 3; // Notifications
+      if (navIndex == 3) return 4; // Profile
+    } else {
+      if (navIndex == 2) return 5; // Notifications
+      if (navIndex == 3) return 6; // Profile
     }
+    return 0;
   }
+
+  int _getNavIndexFromPage(int pageIndex) {
+    if (pageIndex == 0) return 0; // Home
+    if (pageIndex == 2) return 1; // Schedule
+    if (_userRole == UserRole.MANAGER) {
+      if (pageIndex == 3) return 2; // Notifications
+      if (pageIndex == 4) return 3; // Profile
+    } else {
+      if (pageIndex == 5) return 2; // Notifications
+      if (pageIndex == 6) return 3; // Profile
+    }
+    return 0; // Default to home if on quick action tabs
+  }
+
+  bool _isScheduleIndex(int index) => index == 2;
 
   int _getNotificationIndex([UserRole? role]) {
     final r = role ?? _userRole;
-    switch (r) {
-      case UserRole.MANAGER:
-        return 3;
-      case UserRole.HR:
-        return 4; // 0=Home,1=Schedule,2=Accounts,3=Announcements,4=Notifications
-      default: // INTERN
-        return 4; // 0=Home,1=Meal,2=Schedule,3=Status,4=Notifications
-    }
+    return (r == UserRole.MANAGER) ? 3 : 5;
   }
 
   Color _getColorForRole(UserRole role) {

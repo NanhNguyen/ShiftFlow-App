@@ -20,6 +20,9 @@ export class Notification {
 
     @Prop({ required: true })
     type: string;
+
+    @Prop({ type: MongooseSchema.Types.ObjectId, default: null })
+    sourceId: string;
 }
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);

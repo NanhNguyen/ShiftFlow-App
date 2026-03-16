@@ -20,7 +20,7 @@ class StatusPage extends StatelessWidget {
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            backgroundColor: Colors.blue,
+            backgroundColor: Colors.blue.shade700,
             elevation: 0,
             title: const Text(
               AppStrings.myRequestStatus,

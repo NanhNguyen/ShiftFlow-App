@@ -94,4 +94,18 @@ export class UsersController {
             throw new BadRequestException('Không thể tạo tài khoản. Vui lòng kiểm tra lại dữ liệu.');
         }
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('push-subscribe')
+    async subscribePush(@Request() req, @Body() subscription: any) {
+        await this.usersService.addPushSubscription(req.user.id, subscription);
+        return { success: true };
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('push-unsubscribe')
+    async unsubscribePush(@Request() req, @Body('endpoint') endpoint: string) {
+        await this.usersService.removePushSubscription(req.user.id, endpoint);
+        return { success: true };
+    }
 }

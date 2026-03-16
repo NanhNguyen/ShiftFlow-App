@@ -20,6 +20,8 @@ mixin _$MealState {
   BaseStatus get status => throw _privateConstructorUsedError;
   BaseStatus get submitStatus => throw _privateConstructorUsedError;
   List<MealModel> get meals => throw _privateConstructorUsedError;
+  List<MealModel> get overviewMeals => throw _privateConstructorUsedError;
+  List<MealModel> get allRegistrations => throw _privateConstructorUsedError;
   String? get errorMessage => throw _privateConstructorUsedError;
 
   /// Create a copy of MealState
@@ -38,6 +40,8 @@ abstract class $MealStateCopyWith<$Res> {
     BaseStatus status,
     BaseStatus submitStatus,
     List<MealModel> meals,
+    List<MealModel> overviewMeals,
+    List<MealModel> allRegistrations,
     String? errorMessage,
   });
 }
@@ -60,6 +64,8 @@ class _$MealStateCopyWithImpl<$Res, $Val extends MealState>
     Object? status = null,
     Object? submitStatus = null,
     Object? meals = null,
+    Object? overviewMeals = null,
+    Object? allRegistrations = null,
     Object? errorMessage = freezed,
   }) {
     return _then(
@@ -75,6 +81,14 @@ class _$MealStateCopyWithImpl<$Res, $Val extends MealState>
             meals: null == meals
                 ? _value.meals
                 : meals // ignore: cast_nullable_to_non_nullable
+                      as List<MealModel>,
+            overviewMeals: null == overviewMeals
+                ? _value.overviewMeals
+                : overviewMeals // ignore: cast_nullable_to_non_nullable
+                      as List<MealModel>,
+            allRegistrations: null == allRegistrations
+                ? _value.allRegistrations
+                : allRegistrations // ignore: cast_nullable_to_non_nullable
                       as List<MealModel>,
             errorMessage: freezed == errorMessage
                 ? _value.errorMessage
@@ -99,6 +113,8 @@ abstract class _$$MealStateImplCopyWith<$Res>
     BaseStatus status,
     BaseStatus submitStatus,
     List<MealModel> meals,
+    List<MealModel> overviewMeals,
+    List<MealModel> allRegistrations,
     String? errorMessage,
   });
 }
@@ -120,6 +136,8 @@ class __$$MealStateImplCopyWithImpl<$Res>
     Object? status = null,
     Object? submitStatus = null,
     Object? meals = null,
+    Object? overviewMeals = null,
+    Object? allRegistrations = null,
     Object? errorMessage = freezed,
   }) {
     return _then(
@@ -135,6 +153,14 @@ class __$$MealStateImplCopyWithImpl<$Res>
         meals: null == meals
             ? _value._meals
             : meals // ignore: cast_nullable_to_non_nullable
+                  as List<MealModel>,
+        overviewMeals: null == overviewMeals
+            ? _value._overviewMeals
+            : overviewMeals // ignore: cast_nullable_to_non_nullable
+                  as List<MealModel>,
+        allRegistrations: null == allRegistrations
+            ? _value._allRegistrations
+            : allRegistrations // ignore: cast_nullable_to_non_nullable
                   as List<MealModel>,
         errorMessage: freezed == errorMessage
             ? _value.errorMessage
@@ -152,8 +178,12 @@ class _$MealStateImpl implements _MealState {
     this.status = BaseStatus.initial,
     this.submitStatus = BaseStatus.initial,
     final List<MealModel> meals = const [],
+    final List<MealModel> overviewMeals = const [],
+    final List<MealModel> allRegistrations = const [],
     this.errorMessage,
-  }) : _meals = meals;
+  }) : _meals = meals,
+       _overviewMeals = overviewMeals,
+       _allRegistrations = allRegistrations;
 
   @override
   @JsonKey()
@@ -170,12 +200,31 @@ class _$MealStateImpl implements _MealState {
     return EqualUnmodifiableListView(_meals);
   }
 
+  final List<MealModel> _overviewMeals;
+  @override
+  @JsonKey()
+  List<MealModel> get overviewMeals {
+    if (_overviewMeals is EqualUnmodifiableListView) return _overviewMeals;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_overviewMeals);
+  }
+
+  final List<MealModel> _allRegistrations;
+  @override
+  @JsonKey()
+  List<MealModel> get allRegistrations {
+    if (_allRegistrations is EqualUnmodifiableListView)
+      return _allRegistrations;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_allRegistrations);
+  }
+
   @override
   final String? errorMessage;
 
   @override
   String toString() {
-    return 'MealState(status: $status, submitStatus: $submitStatus, meals: $meals, errorMessage: $errorMessage)';
+    return 'MealState(status: $status, submitStatus: $submitStatus, meals: $meals, overviewMeals: $overviewMeals, allRegistrations: $allRegistrations, errorMessage: $errorMessage)';
   }
 
   @override
@@ -187,6 +236,14 @@ class _$MealStateImpl implements _MealState {
             (identical(other.submitStatus, submitStatus) ||
                 other.submitStatus == submitStatus) &&
             const DeepCollectionEquality().equals(other._meals, _meals) &&
+            const DeepCollectionEquality().equals(
+              other._overviewMeals,
+              _overviewMeals,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._allRegistrations,
+              _allRegistrations,
+            ) &&
             (identical(other.errorMessage, errorMessage) ||
                 other.errorMessage == errorMessage));
   }
@@ -197,6 +254,8 @@ class _$MealStateImpl implements _MealState {
     status,
     submitStatus,
     const DeepCollectionEquality().hash(_meals),
+    const DeepCollectionEquality().hash(_overviewMeals),
+    const DeepCollectionEquality().hash(_allRegistrations),
     errorMessage,
   );
 
@@ -214,6 +273,8 @@ abstract class _MealState implements MealState {
     final BaseStatus status,
     final BaseStatus submitStatus,
     final List<MealModel> meals,
+    final List<MealModel> overviewMeals,
+    final List<MealModel> allRegistrations,
     final String? errorMessage,
   }) = _$MealStateImpl;
 
@@ -223,6 +284,10 @@ abstract class _MealState implements MealState {
   BaseStatus get submitStatus;
   @override
   List<MealModel> get meals;
+  @override
+  List<MealModel> get overviewMeals;
+  @override
+  List<MealModel> get allRegistrations;
   @override
   String? get errorMessage;
 
