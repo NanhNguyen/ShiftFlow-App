@@ -122,7 +122,10 @@ class _MainPageState extends State<MainPage> {
                                   itemBuilder: (context, index) {
                                     final item = currentNavItems[index];
                                     final isSelected =
-                                        state.currentIndex == index;
+                                        _getNavIndexFromPage(
+                                          state.currentIndex,
+                                        ) ==
+                                        index;
                                     return ListTile(
                                       leading: isSelected
                                           ? item.activeIcon
