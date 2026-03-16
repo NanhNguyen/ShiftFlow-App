@@ -66,7 +66,7 @@ class _MealPageState extends State<MealPage>
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => context.read<MainCubit>().setIndex(0),
           ),
           centerTitle: true,
