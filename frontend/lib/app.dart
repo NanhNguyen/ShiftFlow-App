@@ -14,7 +14,7 @@ class App extends StatelessWidget {
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'ShiftFlow',
+      title: 'Interna',
       locale: const Locale('vi'),
       supportedLocales: const [Locale('vi')],
       localizationsDelegates: const [

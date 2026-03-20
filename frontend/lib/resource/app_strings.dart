@@ -1,6 +1,6 @@
 class AppStrings {
   // App
-  static const String appName = 'ShiftFlow';
+  static const String appName = 'Interna';
 
   // Login
   static const String login = 'Đăng nhập';
