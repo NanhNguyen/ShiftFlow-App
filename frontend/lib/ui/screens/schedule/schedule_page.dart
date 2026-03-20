@@ -46,12 +46,24 @@ class _SchedulePageState extends State<SchedulePage> {
       value: getIt<ScheduleCubit>(),
       child: Scaffold(
         appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF7678ED), Color(0xFF6366F1)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          foregroundColor: Colors.white,
           title: Text(
             isManagerOrHR
                 ? AppStrings.staffSchedule
                 : AppStrings.myWorkSchedule,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           elevation: 0,
+          centerTitle: true,
         ),
         body: DefaultTabController(
           length: 2,
@@ -70,7 +82,13 @@ class _SchedulePageState extends State<SchedulePage> {
                 // Global search bar — filters both tabs simultaneously
                 if (isManagerOrHR) _buildSearchBar(),
                 Container(
-                  color: const Color(0xFF7678ED),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF7678ED), Color(0xFF6366F1)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
                   child: const TabBar(
                     indicatorColor: Colors.white,
                     indicatorWeight: 3,

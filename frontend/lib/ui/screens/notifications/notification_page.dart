@@ -76,16 +76,25 @@ class _NotificationPageState extends State<NotificationPage> {
       value: _notifCubit,
       child: Scaffold(
         backgroundColor: const Color(0xFFF0F2F5),
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text(
-            AppStrings.notifications,
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          appBar: AppBar(
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF7678ED), Color(0xFF6366F1)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+            ),
+            centerTitle: true,
+            title: const Text(
+              AppStrings.notifications,
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            foregroundColor: Colors.white,
+            elevation: 0,
           ),
-          backgroundColor: const Color(0xFF7678ED),
-          foregroundColor: Colors.white,
-          elevation: 0.5,
-        ),
         body: BlocBuilder<NotificationCubit, NotificationState>(
           builder: (context, state) {
             return RefreshIndicator(

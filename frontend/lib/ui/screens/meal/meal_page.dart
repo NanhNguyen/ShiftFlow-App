@@ -59,7 +59,15 @@ class _MealPageState extends State<MealPage>
       child: Scaffold(
         backgroundColor: const Color(0xFFF0F2F5),
         appBar: AppBar(
-          backgroundColor: const Color(0xFF7678ED),
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF7678ED), Color(0xFF6366F1)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
           foregroundColor: Colors.white,
           title: const Text(
             'Lịch ăn cơm',
@@ -83,6 +91,7 @@ class _MealPageState extends State<MealPage>
                   indicatorWeight: 3,
                 )
               : null,
+          elevation: 0,
         ),
         body: _isHR
             ? TabBarView(
@@ -448,7 +457,6 @@ class _MealPageState extends State<MealPage>
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF7678ED),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -457,6 +465,11 @@ class _MealPageState extends State<MealPage>
             offset: const Offset(0, 4),
           ),
         ],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7678ED), Color(0xFF6366F1)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

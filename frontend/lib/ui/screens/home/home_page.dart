@@ -22,13 +22,22 @@ class HomePage extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            backgroundColor: const Color(0xFF7678ED),
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF7678ED), Color(0xFF6366F1)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+            ),
             title: const Text(
               AppStrings.scheduleOverview,
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
             iconTheme: const IconThemeData(color: Colors.white),
             actions: const [SizedBox(width: 10)],
+            elevation: 0,
           ),
           body: RefreshIndicator(
             onRefresh: () => context.read<HomeCubit>().loadData(),
@@ -196,18 +205,22 @@ class HomePage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(32),
           bottomRight: Radius.circular(32),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, 4),
-            blurRadius: 20,
+            color: const Color(0xFF7678ED).withOpacity(0.2),
+            offset: const Offset(0, 8),
+            blurRadius: 24,
           ),
         ],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7678ED), Color(0xFF6366F1)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,17 +228,17 @@ class HomePage extends StatelessWidget {
           const Text(
             AppStrings.welcomeBack,
             style: TextStyle(
-              color: Color(0xFF444444),
-              fontSize: 18, // Increased from 16
+              color: Colors.white70,
+              fontSize: 18,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 12), // Increased spacing
+          const SizedBox(height: 12),
           Text(
             name,
             style: const TextStyle(
-              color: Colors.black,
-              fontSize: 36, // Increased from 32
+              color: Colors.white,
+              fontSize: 36,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.5,
             ),

@@ -75,7 +75,7 @@ class _LoginPageViewState extends State<LoginPageView> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Color(0xFF0D47A1), Color(0xFF1976D2)],
+                      colors: [Color(0xFF7678ED), Color(0xFF6366F1)],
                     ),
                   ),
                 ),
