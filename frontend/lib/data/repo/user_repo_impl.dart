@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 import '../api/user_api.dart';
+import 'package:image_picker/image_picker.dart';
 import '../model/user_model.dart';
 import 'user_repo.dart';
 
@@ -16,8 +17,8 @@ class UserRepoImpl implements UserRepo {
   }
 
   @override
-  Future<UserModel> uploadAvatar(String filePath) async {
-    final response = await _userApi.uploadAvatar(filePath);
+  Future<UserModel> uploadAvatar(XFile file) async {
+    final response = await _userApi.uploadAvatar(file);
     return UserModel.fromJson(response.data);
   }
 }

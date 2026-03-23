@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 import '../../foundation/storage/token_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import '../model/user_model.dart';
 import '../repo/auth_repo.dart';
 import '../repo/user_repo.dart';
@@ -51,7 +52,7 @@ class AuthService {
     _currentUser = await _userRepo.updateProfile(name: name);
   }
 
-  Future<void> uploadAvatar(String filePath) async {
-    _currentUser = await _userRepo.uploadAvatar(filePath);
+  Future<void> uploadAvatar(XFile file) async {
+    _currentUser = await _userRepo.uploadAvatar(file);
   }
 }

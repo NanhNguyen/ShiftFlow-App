@@ -57,7 +57,7 @@ class ProfilePage extends StatelessWidget {
                         constraints: const BoxConstraints(maxWidth: 800),
                         child: Column(
                           children: [
-                            _buildAvatarSection(context, fullAvatarUrl),
+                            _buildAvatarSection(context, fullAvatarUrl, user),
                             const SizedBox(height: 24),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -135,7 +135,11 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatarSection(BuildContext context, String? avatarUrl) {
+  Widget _buildAvatarSection(BuildContext context, String? avatarUrl, user) {
+    final initial = (user?.name ?? 'U').isNotEmpty
+        ? (user?.name ?? 'U').trim()[0].toUpperCase()
+        : 'U';
+    
     return Stack(
       children: [
         CircleAvatar(
@@ -143,7 +147,14 @@ class ProfilePage extends StatelessWidget {
           backgroundColor: const Color(0xFF7678ED),
           backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
           child: avatarUrl == null
-              ? const Icon(Icons.person, size: 60, color: const Color(0xFF7678ED))
+              ? Text(
+                  initial,
+                  style: const TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                )
               : null,
         ),
         Positioned(
@@ -207,7 +218,7 @@ class ProfilePage extends StatelessWidget {
       final image = await picker.pickImage(source: source, imageQuality: 70);
 
       if (image != null && context.mounted) {
-        context.read<ProfileCubit>().uploadAvatar(image.path);
+        context.read<ProfileCubit>().uploadAvatar(image);
       }
     }
   }

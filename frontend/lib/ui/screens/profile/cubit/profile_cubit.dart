@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 import '../../../cubit/base_cubit.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../data/constant/enums.dart';
 import '../../../../data/service/auth_service.dart';
 import '../../../di/di_config.dart';
@@ -79,9 +80,9 @@ class ProfileCubit extends BaseCubit<ProfileState> {
     });
   }
 
-  Future<void> uploadAvatar(String filePath) async {
+  Future<void> uploadAvatar(XFile file) async {
     await safeCall(() async {
-      await _authService.uploadAvatar(filePath);
+      await _authService.uploadAvatar(file);
       emit(
         state.copyWith(
           status: BaseStatus.success,

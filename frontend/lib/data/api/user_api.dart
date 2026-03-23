@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:image_picker/image_picker.dart';
 import 'api_client.dart';
 
 @lazySingleton
@@ -12,9 +13,11 @@ class UserApi {
     return _apiClient.post('/users/update-profile', data: {'name': name});
   }
 
-  Future<Response> uploadAvatar(String filePath) async {
+  Future<Response> uploadAvatar(XFile file) async {
+    final bytes = await file.readAsBytes();
+    final fileName = file.name;
     final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(filePath),
+      'file': MultipartFile.fromBytes(bytes, filename: fileName),
     });
 
     return _apiClient.post('/users/upload-avatar', data: formData);
