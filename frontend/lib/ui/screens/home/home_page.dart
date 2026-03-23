@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/constant/enums.dart';
-import '../../../data/model/schedule_request_model.dart';
 import '../../../data/service/auth_service.dart';
 import '../../di/di_config.dart';
 import '../main/cubit/main_cubit.dart';
@@ -249,14 +248,15 @@ class HomePage extends StatelessWidget {
 
   Widget _buildQuickStats(HomeState state) {
     final role = getIt<AuthService>().currentUser?.role ?? UserRole.INTERN;
+    final isManagerOrHR = role == UserRole.MANAGER || role == UserRole.HR;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            AppStrings.quickStats, // Assuming this string exists
+            AppStrings.quickStats,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -264,19 +264,22 @@ class HomePage extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildStatCard(
-                  label: AppStrings.pendingRequests, // Assuming this string exists
-                  value: '${state.pendingCount}',
+                  label: isManagerOrHR ? 'Yêu cầu chờ duyệt' : 'Đang chờ duyệt',
+                  value: state.pendingCount.toString(),
                   color: Colors.orange,
+                  icon: Icons.pending_actions_rounded,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _buildStatCard(
-                  label: AppStrings.mealStatus, // Assuming this string exists
-                  value: role == UserRole.MANAGER
-                      ? '${state.mealCountToday} suất'
-                      : (state.isMealRegisteredToday ? 'Đã đăng ký' : 'Chưa đăng ký'),
+                  label: AppStrings.mealStatus,
+                  value: isManagerOrHR 
+                    ? '${state.mealCountToday} suất' 
+                    : (state.isMealRegisteredToday ? 'Đã đăng ký' : 'Chưa đăng ký'),
                   color: Colors.green,
+                  icon: Icons.restaurant_rounded,
+                  smallerValue: !isManagerOrHR,
                 ),
               ),
             ],
@@ -290,32 +293,45 @@ class HomePage extends StatelessWidget {
     required String label,
     required String value,
     required Color color,
+    required IconData icon,
+    bool smallerValue = false,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w900,
-              fontSize: 14,
-              letterSpacing: 1.2,
-            ),
+          Row(
+            children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    letterSpacing: 0.5,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 22,
+            style: TextStyle(
+              fontSize: smallerValue ? 16 : 28,
               fontWeight: FontWeight.bold,
+              color: color,
             ),
           ),
         ],
@@ -354,7 +370,6 @@ class HomePage extends StatelessWidget {
           Icons.notifications,
           Colors.indigo,
           tabIndex: 3,
-          badgeCount: state.unreadNotificationCount,
         ),
         _buildActionItem(
           context,
@@ -400,7 +415,6 @@ class HomePage extends StatelessWidget {
           Icons.notifications,
           Colors.teal,
           tabIndex: 5,
-          badgeCount: state.unreadNotificationCount,
         ),
         _buildActionItem(
           context,
@@ -448,7 +462,6 @@ class HomePage extends StatelessWidget {
           Icons.notifications,
           const Color(0xFF8B5CF6),
           tabIndex: 5,
-          badgeCount: state.unreadNotificationCount,
         ),
         _buildActionItem(
           context,
@@ -569,79 +582,6 @@ class HomePage extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
       ],
-    );
-  }
-
-  Widget _buildQuickStats(HomeState state) {
-    final role = getIt<AuthService>().currentUser?.role ?? UserRole.INTERN;
-    final isManagerOrHR = role == UserRole.MANAGER || role == UserRole.HR;
-
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          // Stat 1: Pending (Useful for everyone)
-          _buildStatCard(
-            isManagerOrHR ? 'Yêu cầu chờ duyệt' : 'Đang chờ duyệt',
-            state.pendingCount.toString(),
-            Colors.orange,
-            Icons.pending_actions_rounded,
-          ),
-          const SizedBox(width: 16),
-          // Stat 2: Meal info
-          _buildStatCard(
-            isManagerOrHR ? 'Tổng suất cơm hôm nay' : 'Cơm hôm nay',
-            isManagerOrHR 
-                ? state.mealCountToday.toString() 
-                : (state.isMealRegisteredToday ? 'Đã đăng ký' : 'Chưa đăng ký'),
-            state.isMealRegisteredToday || isManagerOrHR ? Colors.green : Colors.blueGrey,
-            Icons.restaurant_rounded,
-            smallerTitle: !isManagerOrHR,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String label, String value, Color color, IconData icon, {bool smallerTitle = false}) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.2)),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: smallerTitle ? 18 : 32,
-                fontWeight: FontWeight.w900,
-                color: color,
-                letterSpacing: smallerTitle ? 0 : -1,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color.withOpacity(0.9),
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

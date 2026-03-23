@@ -143,5 +143,7 @@ class AppStrings {
   static const String enterPassword = 'Nhập mật khẩu';
   static const String accounts = 'Tài khoản';
   static const String announcements = 'Bản tin';
+  static const String quickStats = 'Số liệu nhanh';
+  static const String mealStatus = 'Suất cơm hôm nay';
   static const String today = 'Hôm nay';
 }

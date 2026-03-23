@@ -139,16 +139,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i220.TokenStorage>(),
       ),
     );
-    gh.factory<_i1049.AnnouncementCubit>(
-      () => _i1049.AnnouncementCubit(gh<_i97.AnnouncementRepo>()),
-    );
     gh.lazySingleton<_i360.HomeCubit>(
       () => _i360.HomeCubit(
         gh<_i258.AuthService>(),
         gh<_i611.ScheduleRequestRepo>(),
-        gh<_i479.NotificationRepo>(),
         gh<_i1029.MealRepo>(),
       ),
+    );
+    gh.factory<_i1049.AnnouncementCubit>(
+      () => _i1049.AnnouncementCubit(gh<_i97.AnnouncementRepo>()),
     );
     gh.factory<_i158.ProfileCubit>(
       () => _i158.ProfileCubit(gh<_i258.AuthService>()),

@@ -2,7 +2,6 @@ import 'package:injectable/injectable.dart';
 import '../../../cubit/base_cubit.dart';
 import '../../../../data/constant/enums.dart';
 import '../../../../data/service/auth_service.dart';
-import '../../../../data/repo/notification_repo.dart';
 import '../../../../data/repo/schedule_request_repo.dart';
 import '../../../../data/model/schedule_request_model.dart';
 import '../../../di/di_config.dart';
@@ -14,11 +13,10 @@ import 'home_state.dart';
 @lazySingleton
 class HomeCubit extends BaseCubit<HomeState> {
   final ScheduleRequestRepo _scheduleRepo;
-  final NotificationRepo _notificationRepo;
   final MealRepo _mealRepo;
   final AuthService _authService;
 
-  HomeCubit(this._authService, this._scheduleRepo, this._notificationRepo, this._mealRepo)
+  HomeCubit(this._authService, this._scheduleRepo, this._mealRepo)
     : super(HomeState(user: _authService.currentUser));
 
   Future<void> loadData() async {
@@ -30,8 +28,6 @@ class HomeCubit extends BaseCubit<HomeState> {
 
       final notifCubit = getIt<NotificationCubit>();
       final now = DateTime.now();
-      final todayStart = DateTime(now.year, now.month, now.day);
-      final todayEnd = todayStart.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1));
 
       final results = await Future.wait([
         if (!isManagerOrHR)
@@ -87,7 +83,7 @@ class HomeCubit extends BaseCubit<HomeState> {
           pendingCount: pendingCount,
           mealCountToday: mealCountToday,
           isMealRegisteredToday: isMealRegisteredToday,
-          todaySchedule: null, // Removed as per user request
+          todaySchedule: null,
         ),
       );
     });
