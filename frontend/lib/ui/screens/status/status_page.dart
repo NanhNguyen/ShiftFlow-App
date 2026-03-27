@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../di/di_config.dart';
+import '../../theme/app_theme.dart';
 import '../../../../data/constant/enums.dart';
 import '../../../../data/model/schedule_request_model.dart';
 import '../../../../data/service/auth_service.dart';
@@ -20,22 +22,25 @@ class StatusPage extends StatelessWidget {
       child: DefaultTabController(
         length: 3,
         child: Scaffold(
+          backgroundColor: InternaCrystal.bgDeep,
           appBar: AppBar(
+            backgroundColor: Colors.transparent,
             flexibleSpace: Container(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF8B5CF6), Color(0xFF0EA5E9)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                gradient: InternaCrystal.brandGradient,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
                 ),
               ),
             ),
             elevation: 0,
-            title: const Text(
+            title: Text(
               AppStrings.myRequestStatus,
-              style: TextStyle(
+              style: GoogleFonts.inter(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
             leading: IconButton(
@@ -45,17 +50,17 @@ class StatusPage extends StatelessWidget {
             centerTitle: true,
             bottom: TabBar(
               labelColor: Colors.white,
-              unselectedLabelColor: Colors.white.withOpacity(0.6),
+              unselectedLabelColor: Colors.white60,
               indicatorColor: Colors.white,
               indicatorWeight: 3,
-              labelStyle: const TextStyle(
+              labelStyle: GoogleFonts.inter(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ), // Increased
-              unselectedLabelStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ), // Increased
+                fontSize: 14,
+              ),
+              unselectedLabelStyle: GoogleFonts.inter(
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+              ),
               tabs: [
                 Tab(text: AppStrings.pending.toUpperCase()),
                 Tab(text: AppStrings.approved.toUpperCase()),
@@ -102,7 +107,17 @@ class StatusPage extends StatelessWidget {
           child: Container(
             height: MediaQuery.of(context).size.height * 0.6,
             alignment: Alignment.center,
-            child: const Text(AppStrings.noRequestsFound),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inbox_outlined, size: 48, color: InternaCrystal.textMuted),
+                const SizedBox(height: 12),
+                Text(
+                  AppStrings.noRequestsFound,
+                  style: GoogleFonts.inter(color: InternaCrystal.textSecondary),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -112,15 +127,12 @@ class StatusPage extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: () => context.read<StatusCubit>().loadRequests(),
+      color: InternaCrystal.accentPurple,
       child: ListView.builder(
-        padding: const EdgeInsets.all(20),
-        itemCount: items.length + 1, // +1 for status bar
+        padding: const EdgeInsets.all(16),
+        itemCount: items.length + 1,
         itemBuilder: (context, index) {
-          if (index == 0) {
-            // Only show status bar in "ALL" tab or as a summary?
-            // Let's keep it simple and just show the list
-            return const SizedBox.shrink();
-          }
+          if (index == 0) return const SizedBox.shrink();
           final item = items[index - 1];
           if (item is List<ScheduleRequestModel>) {
             return _buildGroupedItem(context, item);
@@ -147,65 +159,84 @@ class StatusPage extends StatelessWidget {
     final first = group.first;
     final isPending = first.status == RequestStatus.PENDING;
     final color = first.status == RequestStatus.PENDING
-        ? Colors.orange
-        : (first.status == RequestStatus.APPROVED ? Colors.green : Colors.red);
+        ? InternaCrystal.accentOrange
+        : (first.status == RequestStatus.APPROVED
+            ? InternaCrystal.accentGreen
+            : InternaCrystal.accentRed);
 
-    // For interns, hide the count since they only have their own schedules
     final role = getIt<AuthService>().currentUser?.role ?? UserRole.INTERN;
     final isIntern = role == UserRole.INTERN || role == UserRole.EMPLOYEE;
     final subtitle = isIntern
         ? first.status.displayName
         : '${group.length} ${AppStrings.itemsCount} • ${first.status.displayName}';
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
+      decoration: BoxDecoration(
+        color: InternaCrystal.bgCard.withOpacity(0.6),
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
-      child: ExpansionTile(
-        title: Text(
-          first.description ?? AppStrings.batchRequest,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ), // Increased from 16
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(fontSize: 16),
-        ), // Increased from 14
-        leading: Icon(
-          first.isRecurring ? Icons.repeat : Icons.event_note,
-          color: const Color(0xFF8B5CF6),
-          size: 28, // Increased
-        ),
-        trailing: isPending
-            ? IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: Colors.red,
-                  size: 28,
-                ), // Increased
-                onPressed: () => _confirmDelete(context, () {
-                  context.read<StatusCubit>().deleteBatchRequests(
-                    first.groupId!,
-                  );
-                }),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          collapsedIconColor: InternaCrystal.textMuted,
+          iconColor: InternaCrystal.accentPurple,
+          title: Text(
+            first.description ?? AppStrings.batchRequest,
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: InternaCrystal.textPrimary,
+            ),
+          ),
+          subtitle: Text(
+            subtitle,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: color,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: InternaCrystal.accentPurple.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              first.isRecurring ? Icons.repeat : Icons.event_note,
+              color: InternaCrystal.accentPurple,
+              size: 22,
+            ),
+          ),
+          trailing: isPending
+              ? IconButton(
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: InternaCrystal.accentRed,
+                    size: 22,
+                  ),
+                  onPressed: () => _confirmDelete(context, () {
+                    context.read<StatusCubit>().deleteBatchRequests(
+                      first.groupId!,
+                    );
+                  }),
+                )
+              : null,
+          children: group
+              .map(
+                (req) => RequestItem(
+                  request: req,
+                  onDelete: isPending
+                      ? () => _confirmDelete(context, () {
+                          context.read<StatusCubit>().deleteRequest(req.id);
+                        })
+                      : null,
+                ),
               )
-            : null,
-        children: group
-            .map(
-              (req) => RequestItem(
-                request: req,
-                onDelete: isPending
-                    ? () => _confirmDelete(context, () {
-                        context.read<StatusCubit>().deleteRequest(req.id);
-                      })
-                    : null,
-              ),
-            )
-            .toList(),
+              .toList(),
+        ),
       ),
     );
   }
@@ -221,14 +252,20 @@ class StatusPage extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             child: const Text(AppStrings.cancel),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               onConfirm();
             },
-            child: const Text(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: InternaCrystal.accentRed,
+            ),
+            child: Text(
               AppStrings.delete,
-              style: TextStyle(color: Colors.red),
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

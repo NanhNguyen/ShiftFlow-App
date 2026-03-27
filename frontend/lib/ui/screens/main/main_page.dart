@@ -1,9 +1,12 @@
+import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../data/constant/enums.dart';
 import '../../../data/service/auth_service.dart';
 import '../../di/di_config.dart';
+import '../../theme/app_theme.dart';
 import '../home/home_page.dart';
 import '../schedule/schedule_page.dart';
 import '../status/status_page.dart';
@@ -36,7 +39,6 @@ class _MainPageState extends State<MainPage> {
 
   late final UserRole _userRole;
   late final List<Widget> _pages;
-  late final Color _selectedColor;
 
   @override
   void initState() {
@@ -44,12 +46,11 @@ class _MainPageState extends State<MainPage> {
     final authService = getIt<AuthService>();
     _userRole = authService.currentUser?.role ?? UserRole.INTERN;
 
-    _mainCubit = getIt<MainCubit>()..setIndex(0); // always start at Home tab
+    _mainCubit = getIt<MainCubit>()..setIndex(0);
     _homeCubit = getIt<HomeCubit>()..loadData();
     _notifCubit = getIt<NotificationCubit>()..loadNotifications();
 
     _pages = _getPagesForRole(_userRole);
-    _selectedColor = _getColorForRole(_userRole);
   }
 
   @override
@@ -80,42 +81,59 @@ class _MainPageState extends State<MainPage> {
                 notifications: notifState.notifications,
                 unreadCount: unreadNotifications.length,
                 child: Scaffold(
+                  backgroundColor: InternaCrystal.bgDeep,
                   body: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (isWideScreen)
                         Container(
                           width: 250,
-                          color: Colors.white,
+                          decoration: BoxDecoration(
+                            color: InternaCrystal.bgSidebar,
+                            border: Border(
+                              right: BorderSide(
+                                color: InternaCrystal.borderSubtle,
+                                width: 0.5,
+                              ),
+                            ),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(24),
-                                child: const Row(
+                                child: Row(
                                   children: [
-                                    Icon(
-                                      Icons.calendar_month,
-                                      size: 32,
-                                      color: const Color(0xFF8B5CF6),
+                                    ShaderMask(
+                                      shaderCallback: (bounds) =>
+                                          InternaCrystal.brandGradient.createShader(bounds),
+                                      child: const Icon(
+                                        Icons.auto_awesome,
+                                        size: 28,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                    SizedBox(width: 12),
+                                    const SizedBox(width: 12),
                                     Text(
                                       AppStrings.appName,
-                                      style: TextStyle(
-                                        fontSize: 24,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 22,
                                         fontWeight: FontWeight.bold,
-                                        color: const Color(0xFF8B5CF6),
+                                        color: InternaCrystal.textPrimary,
+                                        letterSpacing: -1,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const Divider(height: 1),
+                              Divider(
+                                height: 1,
+                                color: InternaCrystal.borderSubtle,
+                              ),
                               Expanded(
                                 child: ListView.builder(
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
+                                    vertical: 12,
                                   ),
                                   itemCount: currentNavItems.length,
                                   itemBuilder: (context, index) {
@@ -125,50 +143,67 @@ class _MainPageState extends State<MainPage> {
                                           state.currentIndex,
                                         ) ==
                                         index;
-                                    return ListTile(
-                                      leading: isSelected
-                                          ? item.activeIcon
-                                          : item.icon,
-                                      title: Text(
-                                        item.label ?? '',
-                                        style: TextStyle(
-                                          fontWeight: isSelected
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                          color: isSelected
-                                              ? _selectedColor
-                                              : Colors.grey.shade700,
-                                          fontSize: 16,
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 2,
+                                      ),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(12),
+                                          onTap: () {
+                                            final pageIndex = _getPageIndexFromNav(index);
+                                            _mainCubit.setIndex(pageIndex);
+                                            if (_isScheduleIndex(pageIndex)) {
+                                              getIt<ScheduleCubit>().loadSchedules(_userRole);
+                                              getIt<ScheduleCubit>().resetDate();
+                                            }
+                                            if (pageIndex == _getNotificationIndex(_userRole)) {
+                                              _notifCubit.markAllAsRead();
+                                              getIt<HomeCubit>().loadData();
+                                            }
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 12,
+                                            ),
+                                            decoration: isSelected
+                                                ? BoxDecoration(
+                                                    color: InternaCrystal.accentPurple.withOpacity(0.1),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    border: Border.all(
+                                                      color: InternaCrystal.accentPurple.withOpacity(0.2),
+                                                    ),
+                                                  )
+                                                : null,
+                                            child: Row(
+                                              children: [
+                                                isSelected
+                                                    ? item.activeIcon
+                                                    : item.icon,
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    item.label ?? '',
+                                                    style: GoogleFonts.inter(
+                                                      fontWeight: isSelected
+                                                          ? FontWeight.bold
+                                                          : FontWeight.w500,
+                                                      color: isSelected
+                                                          ? InternaCrystal.textPrimary
+                                                          : InternaCrystal.textSecondary,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                      selected: isSelected,
-                                      selectedTileColor: _selectedColor
-                                          .withOpacity(0.1),
-                                      iconColor: isSelected
-                                          ? _selectedColor
-                                          : Colors.grey.shade600,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 24,
-                                            vertical: 4,
-                                          ),
-                                      onTap: () {
-                                        final pageIndex = _getPageIndexFromNav(
-                                          index,
-                                        );
-                                        _mainCubit.setIndex(pageIndex);
-                                        if (_isScheduleIndex(pageIndex)) {
-                                          getIt<ScheduleCubit>().loadSchedules(
-                                            _userRole,
-                                          );
-                                          getIt<ScheduleCubit>().resetDate();
-                                        }
-                                        if (pageIndex ==
-                                            _getNotificationIndex(_userRole)) {
-                                          _notifCubit.markAllAsRead();
-                                          getIt<HomeCubit>().loadData();
-                                        }
-                                      },
                                     );
                                   },
                                 ),
@@ -177,7 +212,7 @@ class _MainPageState extends State<MainPage> {
                           ),
                         ),
                       if (isWideScreen)
-                        const VerticalDivider(thickness: 1, width: 1),
+                        const SizedBox.shrink(),
                       Expanded(
                         child: IndexedStack(
                           index: state.currentIndex,
@@ -193,47 +228,51 @@ class _MainPageState extends State<MainPage> {
                           decoration: BoxDecoration(
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
-                                blurRadius: 15,
+                                color: Colors.black.withOpacity(0.25),
+                                blurRadius: 20,
                                 offset: const Offset(0, 5),
                               ),
                             ],
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(24),
-                            child: BottomNavigationBar(
-                              currentIndex: _getNavIndexFromPage(
-                                state.currentIndex,
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: InternaCrystal.bgSidebar.withOpacity(0.85),
+                                  border: Border.all(
+                                    color: InternaCrystal.borderSubtle,
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                child: BottomNavigationBar(
+                                  currentIndex: _getNavIndexFromPage(
+                                    state.currentIndex,
+                                  ),
+                                  onTap: (index) {
+                                    final pageIndex = _getPageIndexFromNav(index);
+                                    _mainCubit.setIndex(pageIndex);
+                                    if (_isScheduleIndex(pageIndex)) {
+                                      getIt<ScheduleCubit>().loadSchedules(_userRole);
+                                      getIt<ScheduleCubit>().resetDate();
+                                    }
+                                    if (pageIndex == _getNotificationIndex(_userRole)) {
+                                      _notifCubit.markAllAsRead();
+                                      getIt<HomeCubit>().loadData();
+                                    }
+                                  },
+                                  backgroundColor: Colors.transparent,
+                                  type: BottomNavigationBarType.fixed,
+                                  selectedItemColor: InternaCrystal.accentPurple,
+                                  unselectedItemColor: InternaCrystal.textSecondary,
+                                  showSelectedLabels: false,
+                                  showUnselectedLabels: false,
+                                  elevation: 0,
+                                  iconSize: 26,
+                                  items: currentNavItems,
+                                ),
                               ),
-                              onTap: (index) {
-                                final pageIndex = _getPageIndexFromNav(index);
-                                _mainCubit.setIndex(pageIndex);
-                                if (_isScheduleIndex(pageIndex)) {
-                                  getIt<ScheduleCubit>().loadSchedules(
-                                    _userRole,
-                                  );
-                                  getIt<ScheduleCubit>().resetDate();
-                                }
-                                if (pageIndex ==
-                                    _getNotificationIndex(_userRole)) {
-                                  _notifCubit.markAllAsRead();
-                                  getIt<HomeCubit>().loadData();
-                                }
-                              },
-                              type: BottomNavigationBarType.fixed,
-                              selectedItemColor: _selectedColor,
-                              unselectedItemColor: Colors.grey,
-                              showSelectedLabels: false,
-                              showUnselectedLabels: false,
-                              iconSize: 28,
-                              selectedLabelStyle: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              unselectedLabelStyle: const TextStyle(
-                                fontSize: 12,
-                              ),
-                              items: currentNavItems,
                             ),
                           ),
                         ),
@@ -246,7 +285,6 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  /// Build manager nav items with live pending-request badge on tab 1 and notifications on tab 2.
   List<BottomNavigationBarItem> _getManagerNavItemsWithBadge(
     BuildContext context,
     int unreadNotifCount,
@@ -263,16 +301,8 @@ class _MainPageState extends State<MainPage> {
         label: AppStrings.schedule,
       ),
       BottomNavigationBarItem(
-        icon: _withBadge(
-          Icons.notifications_outlined,
-          unreadNotifCount,
-          active: false,
-        ),
-        activeIcon: _withBadge(
-          Icons.notifications,
-          unreadNotifCount,
-          active: true,
-        ),
+        icon: _withBadge(Icons.notifications_outlined, unreadNotifCount, active: false),
+        activeIcon: _withBadge(Icons.notifications, unreadNotifCount, active: true),
         label: AppStrings.notifications,
       ),
       const BottomNavigationBarItem(
@@ -283,7 +313,6 @@ class _MainPageState extends State<MainPage> {
     ];
   }
 
-  /// Overlay a red badge on top-right of an icon.
   Widget _withBadge(IconData iconData, int count, {required bool active}) {
     return Stack(
       clipBehavior: Clip.none,
@@ -296,16 +325,16 @@ class _MainPageState extends State<MainPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: InternaCrystal.accentRed,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white, width: 1.2),
+                border: Border.all(color: InternaCrystal.bgSidebar, width: 1.2),
               ),
               constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
               child: Text(
                 count > 99 ? '99+' : '$count',
-                style: const TextStyle(
+                style: GoogleFonts.inter(
                   color: Colors.white,
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: FontWeight.bold,
                   height: 1.1,
                 ),
@@ -367,16 +396,8 @@ class _MainPageState extends State<MainPage> {
             label: AppStrings.schedule,
           ),
           BottomNavigationBarItem(
-            icon: _withBadge(
-              Icons.notifications_outlined,
-              unreadCount,
-              active: false,
-            ),
-            activeIcon: _withBadge(
-              Icons.notifications,
-              unreadCount,
-              active: true,
-            ),
+            icon: _withBadge(Icons.notifications_outlined, unreadCount, active: false),
+            activeIcon: _withBadge(Icons.notifications, unreadCount, active: true),
             label: AppStrings.notifications,
           ),
           const BottomNavigationBarItem(
@@ -389,35 +410,35 @@ class _MainPageState extends State<MainPage> {
   }
 
   int _getPageIndexFromNav(int navIndex) {
-    if (navIndex == 0) return 0; // Home
-    if (navIndex == 1) return 2; // Schedule (universal index 2)
+    if (navIndex == 0) return 0;
+    if (navIndex == 1) return 2;
     if (_userRole == UserRole.MANAGER) {
-      if (navIndex == 2) return 3; // Notifications
-      if (navIndex == 3) return 4; // Profile
+      if (navIndex == 2) return 3;
+      if (navIndex == 3) return 4;
     } else if (_userRole == UserRole.HR) {
-      if (navIndex == 2) return 4; // Notifications
-      if (navIndex == 3) return 5; // Profile
+      if (navIndex == 2) return 4;
+      if (navIndex == 3) return 5;
     } else {
-      if (navIndex == 2) return 5; // Notifications
-      if (navIndex == 3) return 6; // Profile
+      if (navIndex == 2) return 5;
+      if (navIndex == 3) return 6;
     }
     return 0;
   }
 
   int _getNavIndexFromPage(int pageIndex) {
-    if (pageIndex == 0) return 0; // Home
-    if (pageIndex == 2) return 1; // Schedule
+    if (pageIndex == 0) return 0;
+    if (pageIndex == 2) return 1;
     if (_userRole == UserRole.MANAGER) {
-      if (pageIndex == 3) return 2; // Notifications
-      if (pageIndex == 4) return 3; // Profile
+      if (pageIndex == 3) return 2;
+      if (pageIndex == 4) return 3;
     } else if (_userRole == UserRole.HR) {
-      if (pageIndex == 4) return 2; // Notifications
-      if (pageIndex == 5) return 3; // Profile
+      if (pageIndex == 4) return 2;
+      if (pageIndex == 5) return 3;
     } else {
-      if (pageIndex == 5) return 2; // Notifications
-      if (pageIndex == 6) return 3; // Profile
+      if (pageIndex == 5) return 2;
+      if (pageIndex == 6) return 3;
     }
-    return 0; // Default to home if on quick action tabs
+    return 0;
   }
 
   bool _isScheduleIndex(int index) => index == 2;
@@ -427,9 +448,5 @@ class _MainPageState extends State<MainPage> {
     if (r == UserRole.MANAGER) return 3;
     if (r == UserRole.HR) return 4;
     return 5;
-  }
-
-  Color _getColorForRole(UserRole role) {
-    return const Color(0xFF8B5CF6);
   }
 }

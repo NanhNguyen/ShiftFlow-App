@@ -1,8 +1,11 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../data/constant/enums.dart';
 import '../../../data/service/auth_service.dart';
 import '../../di/di_config.dart';
+import '../../theme/app_theme.dart';
 import '../main/cubit/main_cubit.dart';
 import '../schedule_form/schedule_form_modal.dart';
 import 'cubit/home_cubit.dart';
@@ -21,26 +24,32 @@ class HomePage extends StatelessWidget {
         final isManagerOrHR = role == UserRole.MANAGER || role == UserRole.HR;
 
         return Scaffold(
+          backgroundColor: InternaCrystal.bgDeep,
           appBar: AppBar(
+            backgroundColor: Colors.transparent,
             flexibleSpace: Container(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF8B5CF6), Color(0xFF0EA5E9)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                gradient: InternaCrystal.brandGradient,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
                 ),
               ),
             ),
-            title: const Text(
+            title: Text(
               AppStrings.scheduleOverview,
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
             ),
             iconTheme: const IconThemeData(color: Colors.white),
-            actions: const [SizedBox(width: 10)],
             elevation: 0,
           ),
           body: RefreshIndicator(
             onRefresh: () => context.read<HomeCubit>().loadData(),
+            color: InternaCrystal.accentPurple,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth >= 800;
@@ -80,25 +89,29 @@ class HomePage extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     _buildQuickStats(state),
-                                    const Padding(
-                                      padding: EdgeInsets.only(
-                                        left: 20,
-                                        top: 15,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 15,
                                       ),
                                       child: Text(
                                         AppStrings.recentUpdates,
-                                        style: TextStyle(
-                                          fontSize: 22,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 20,
                                           fontWeight: FontWeight.bold,
+                                          color: InternaCrystal.textPrimary,
                                         ),
                                       ),
                                     ),
-                                    const Center(
+                                    Center(
                                       child: Padding(
-                                        padding: EdgeInsets.all(50),
+                                        padding: const EdgeInsets.all(50),
                                         child: Text(
                                           AppStrings.noRecentUpdates,
-                                          style: TextStyle(fontSize: 18),
+                                          style: GoogleFonts.inter(
+                                            fontSize: 15,
+                                            color: InternaCrystal.textSecondary,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -114,25 +127,29 @@ class HomePage extends StatelessWidget {
                           children: [
                             _buildQuickActions(context, state, isWide: false),
                             _buildQuickStats(state),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 20,
                                 vertical: 15,
                               ),
                               child: Text(
                                 AppStrings.recentUpdates,
-                                style: TextStyle(
-                                  fontSize: 22,
+                                style: GoogleFonts.inter(
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
+                                  color: InternaCrystal.textPrimary,
                                 ),
                               ),
                             ),
-                            const Center(
+                            Center(
                               child: Padding(
-                                padding: EdgeInsets.all(50),
+                                padding: const EdgeInsets.all(50),
                                 child: Text(
                                   AppStrings.noRecentUpdates,
-                                  style: TextStyle(fontSize: 18),
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15,
+                                    color: InternaCrystal.textSecondary,
+                                  ),
                                 ),
                               ),
                             ),
@@ -145,18 +162,17 @@ class HomePage extends StatelessWidget {
             ),
           ),
           floatingActionButton: () {
-            // Only Intern and Employee can register leave
             if (role == UserRole.INTERN || role == UserRole.EMPLOYEE) {
               return FloatingActionButton.extended(
                 onPressed: () {
                   showScheduleFormModal(context, isInitialRecurring: false);
                 },
-                backgroundColor: const Color(0xFF8B5CF6),
+                backgroundColor: InternaCrystal.accentPurple,
                 foregroundColor: Colors.white,
                 icon: const Icon(Icons.add),
-                label: const Text(
+                label: Text(
                   AppStrings.registerLeave,
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                 ),
               );
             }
@@ -180,9 +196,9 @@ class HomePage extends StatelessWidget {
           children: [
             Text(
               '${AppStrings.welcomeBack}, $name!',
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 32,
+              style: GoogleFonts.inter(
+                color: InternaCrystal.textPrimary,
+                fontSize: 30,
                 fontWeight: FontWeight.w900,
                 letterSpacing: -0.5,
               ),
@@ -192,7 +208,10 @@ class HomePage extends StatelessWidget {
               isManagerOrHR
                   ? 'Đây là tổng quan các yêu cầu và lịch trình cần quản lý.'
                   : 'Đây là tổng quan lịch trình và công việc của bạn.',
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+              style: GoogleFonts.inter(
+                color: InternaCrystal.textSecondary,
+                fontSize: 15,
+              ),
             ),
           ],
         ),
@@ -209,34 +228,30 @@ class HomePage extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF8B5CF6).withOpacity(0.2),
+            color: InternaCrystal.accentPurple.withOpacity(0.2),
             offset: const Offset(0, 8),
             blurRadius: 24,
           ),
         ],
-        gradient: const LinearGradient(
-          colors: [Color(0xFF8B5CF6), Color(0xFF0EA5E9)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: InternaCrystal.brandGradient,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             AppStrings.welcomeBack,
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 18,
+            style: GoogleFonts.inter(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 12),
           Text(
             name,
-            style: const TextStyle(
+            style: GoogleFonts.inter(
               color: Colors.white,
-              fontSize: 36,
+              fontSize: 32,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.5,
             ),
@@ -255,9 +270,13 @@ class HomePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             AppStrings.quickStats,
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: InternaCrystal.textPrimary,
+            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -266,7 +285,7 @@ class HomePage extends StatelessWidget {
                 child: _buildStatCard(
                   label: isManagerOrHR ? 'Yêu cầu chờ duyệt' : 'Đang chờ duyệt',
                   value: state.pendingCount.toString(),
-                  color: Colors.orange,
+                  color: InternaCrystal.accentOrange,
                   icon: Icons.pending_actions_rounded,
                 ),
               ),
@@ -274,10 +293,10 @@ class HomePage extends StatelessWidget {
               Expanded(
                 child: _buildStatCard(
                   label: AppStrings.mealStatus,
-                  value: isManagerOrHR 
-                    ? '${state.mealCountToday} suất' 
-                    : (state.isMealRegisteredToday ? 'Đã đăng ký' : 'Chưa đăng ký'),
-                  color: Colors.green,
+                  value: isManagerOrHR
+                      ? '${state.mealCountToday} suất'
+                      : (state.isMealRegisteredToday ? 'Đã đăng ký' : 'Chưa đăng ký'),
+                  color: InternaCrystal.accentGreen,
                   icon: Icons.restaurant_rounded,
                   smallerValue: !isManagerOrHR,
                 ),
@@ -296,45 +315,65 @@ class HomePage extends StatelessWidget {
     required IconData icon,
     bool smallerValue = false,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: InternaCrystal.bgCard.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: InternaCrystal.borderSubtle),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12,
-                    letterSpacing: 0.5,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: color, size: 16),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      label.toUpperCase(),
+                      style: GoogleFonts.inter(
+                        color: InternaCrystal.textSecondary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10,
+                        letterSpacing: 0.5,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                value,
+                style: GoogleFonts.inter(
+                  fontSize: smallerValue ? 15 : 22,
+                  fontWeight: FontWeight.bold,
+                  color: InternaCrystal.textPrimary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: smallerValue ? 16 : 28,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -349,127 +388,28 @@ class HomePage extends StatelessWidget {
     List<Widget> actions;
     if (role == UserRole.MANAGER) {
       actions = [
-        _buildActionItem(
-          context,
-          AppStrings.requests,
-          Icons.pending_actions,
-          Colors.orange,
-          tabIndex: 1,
-          badgeCount: state.pendingCount,
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.schedule,
-          Icons.calendar_month,
-          const Color(0xFF8B5CF6),
-          tabIndex: 2,
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.notifications,
-          Icons.notifications,
-          Colors.indigo,
-          tabIndex: 3,
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.profile,
-          Icons.person,
-          Colors.green,
-          tabIndex: 4,
-        ),
+        _buildActionItem(context, AppStrings.requests, Icons.pending_actions, InternaCrystal.accentOrange, tabIndex: 1, badgeCount: state.pendingCount),
+        _buildActionItem(context, AppStrings.schedule, Icons.calendar_month, InternaCrystal.accentPurple, tabIndex: 2),
+        _buildActionItem(context, AppStrings.notifications, Icons.notifications, InternaCrystal.accentBlue, tabIndex: 3),
+        _buildActionItem(context, AppStrings.profile, Icons.person, InternaCrystal.accentGreen, tabIndex: 4),
       ];
     } else if (role == UserRole.HR) {
       actions = [
-        _buildActionItem(
-          context,
-          'Thống kê cơm',
-          Icons.rice_bowl,
-          Colors.deepOrange,
-          tabIndex: 1,
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.schedule,
-          Icons.calendar_month,
-          const Color(0xFF8B5CF6),
-          tabIndex: 2,
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.accounts,
-          Icons.people,
-          Colors.purple,
-          onTap: () => showCreateAccountModal(context),
-        ),
-        _buildActionItem(
-          context,
-          'Bản tin HR',
-          Icons.campaign,
-          Colors.indigo,
-          tabIndex: 4,
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.notifications,
-          Icons.notifications,
-          Colors.teal,
-          tabIndex: 5,
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.profile,
-          Icons.person,
-          Colors.green,
-          tabIndex: 6,
-        ),
+        _buildActionItem(context, 'Thống kê cơm', Icons.rice_bowl, const Color(0xFFF97316), tabIndex: 1),
+        _buildActionItem(context, AppStrings.schedule, Icons.calendar_month, InternaCrystal.accentPurple, tabIndex: 2),
+        _buildActionItem(context, AppStrings.accounts, Icons.people, const Color(0xFFA855F7), onTap: () => showCreateAccountModal(context)),
+        _buildActionItem(context, 'Bản tin HR', Icons.campaign, InternaCrystal.accentBlue, tabIndex: 4),
+        _buildActionItem(context, AppStrings.notifications, Icons.notifications, const Color(0xFF14B8A6), tabIndex: 5),
+        _buildActionItem(context, AppStrings.profile, Icons.person, InternaCrystal.accentGreen, tabIndex: 6),
       ];
     } else {
-      // Intern/Employee
       actions = [
-        _buildActionItem(
-          context,
-          'Đặt cơm',
-          Icons.rice_bowl,
-          Colors.deepOrange,
-          tabIndex: 1,
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.status,
-          Icons.assignment,
-          Colors.teal,
-          tabIndex: 3,
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.announcements,
-          Icons.campaign,
-          Colors.indigo,
-          tabIndex: 4,
-        ),
-        _buildActionItem(
-          context,
-          'Đăng ký nghỉ',
-          Icons.event_note,
-          Colors.orange,
-          onTap: () =>
-              showScheduleFormModal(context, isInitialRecurring: false),
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.notifications,
-          Icons.notifications,
-          const Color(0xFF8B5CF6),
-          tabIndex: 5,
-        ),
-        _buildActionItem(
-          context,
-          AppStrings.profile,
-          Icons.person,
-          Colors.green,
-          tabIndex: 6,
-        ),
+        _buildActionItem(context, 'Đặt cơm', Icons.rice_bowl, const Color(0xFFF97316), tabIndex: 1),
+        _buildActionItem(context, AppStrings.status, Icons.assignment, const Color(0xFF14B8A6), tabIndex: 3),
+        _buildActionItem(context, AppStrings.announcements, Icons.campaign, InternaCrystal.accentBlue, tabIndex: 4),
+        _buildActionItem(context, 'Đăng ký nghỉ', Icons.event_note, InternaCrystal.accentOrange, onTap: () => showScheduleFormModal(context, isInitialRecurring: false)),
+        _buildActionItem(context, AppStrings.notifications, Icons.notifications, InternaCrystal.accentPurple, tabIndex: 5),
+        _buildActionItem(context, AppStrings.profile, Icons.person, InternaCrystal.accentGreen, tabIndex: 6),
       ];
     }
 
@@ -478,9 +418,13 @@ class HomePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             AppStrings.quickActions,
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: InternaCrystal.textPrimary,
+            ),
           ),
           const SizedBox(height: 16),
           GridView.count(
@@ -513,8 +457,7 @@ class HomePage extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             InkWell(
-              onTap:
-                  onTap ??
+              onTap: onTap ??
                   () {
                     if (tabIndex != null) {
                       context.read<MainCubit>().setIndex(tabIndex);
@@ -525,10 +468,11 @@ class HomePage extends StatelessWidget {
                 aspectRatio: 1,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: color.withOpacity(0.15)),
                   ),
-                  child: Icon(icon, color: color, size: 30),
+                  child: Icon(icon, color: color, size: 26),
                 ),
               ),
             ),
@@ -537,31 +481,24 @@ class HomePage extends StatelessWidget {
                 right: -5,
                 top: -5,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.rectangle,
+                    color: InternaCrystal.accentRed,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: InternaCrystal.bgDeep, width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
+                        color: InternaCrystal.accentRed.withOpacity(0.3),
+                        blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  constraints: const BoxConstraints(
-                    minWidth: 20,
-                    minHeight: 20,
-                  ),
+                  constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
                   child: Center(
                     child: Text(
                       badgeCount > 99 ? '99+' : '$badgeCount',
-                      style: const TextStyle(
+                      style: GoogleFonts.inter(
                         color: Colors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -576,7 +513,11 @@ class HomePage extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: InternaCrystal.textPrimary,
+          ),
           textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

@@ -6,3 +6,6 @@
 
 # Root level ignores
 .agent/
+.stitch/
+site/
+skills/

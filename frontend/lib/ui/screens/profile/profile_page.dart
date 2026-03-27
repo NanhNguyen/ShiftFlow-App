@@ -1,8 +1,11 @@
+import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../di/di_config.dart';
 import '../../router/app_router.gr.dart';
+import '../../theme/app_theme.dart';
 import '../../../data/constant/enums.dart';
 import 'cubit/profile_cubit.dart';
 import 'cubit/profile_state.dart';
@@ -20,7 +23,6 @@ class ProfilePage extends StatelessWidget {
         listener: (context, state) {
           if (state.status == BaseStatus.success) {
             if (state.user == null) {
-              // Show dialog for password/name change success which requires relogin
               showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -42,9 +44,9 @@ class ProfilePage extends StatelessWidget {
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(AppStrings.actionSuccessful),
-                  backgroundColor: Colors.green,
+                SnackBar(
+                  content: const Text(AppStrings.actionSuccessful),
+                  backgroundColor: InternaCrystal.accentGreen,
                 ),
               );
             }
@@ -52,7 +54,7 @@ class ProfilePage extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.errorMessage ?? AppStrings.anErrorOccurred),
-                backgroundColor: Colors.red,
+                backgroundColor: InternaCrystal.accentRed,
               ),
             );
           }
@@ -65,33 +67,59 @@ class ProfilePage extends StatelessWidget {
               : null;
 
           return Scaffold(
-            appBar: AppBar(title: const Text(AppStrings.myProfile)),
+            backgroundColor: InternaCrystal.bgDeep,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  gradient: InternaCrystal.brandGradient,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
+                  ),
+                ),
+              ),
+              title: Text(
+                AppStrings.myProfile,
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              iconTheme: const IconThemeData(color: Colors.white),
+              elevation: 0,
+            ),
             body: state.status == BaseStatus.loading
                 ? const Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
                     child: Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 800),
+                        constraints: const BoxConstraints(maxWidth: 600),
                         child: Column(
                           children: [
+                            const SizedBox(height: 16),
+                            // ── Avatar ──
                             _buildAvatarSection(context, fullAvatarUrl, user),
                             const SizedBox(height: 24),
+                            // ── Name ──
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
                                   user?.name ?? 'User Name',
-                                  style: const TextStyle(
-                                    fontSize: 28,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 26,
                                     fontWeight: FontWeight.bold,
+                                    color: InternaCrystal.textPrimary,
                                   ),
                                 ),
                                 IconButton(
                                   icon: const Icon(
-                                    Icons.edit,
+                                    Icons.edit_outlined,
                                     size: 20,
-                                    color: const Color(0xFF8B5CF6),
+                                    color: InternaCrystal.accentPurple,
                                   ),
                                   onPressed: () => _showEditNameDialog(
                                     context,
@@ -103,44 +131,71 @@ class ProfilePage extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               user?.email ?? 'email@example.com',
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 18,
+                              style: GoogleFonts.inter(
+                                color: InternaCrystal.textSecondary,
+                                fontSize: 15,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
+                            // ── Role badge ──
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 6,
+                                horizontal: 18,
+                                vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF8B5CF6).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
+                                gradient: LinearGradient(
+                                  colors: [
+                                    InternaCrystal.accentPurple.withOpacity(0.2),
+                                    InternaCrystal.accentBlue.withOpacity(0.1),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: InternaCrystal.accentPurple.withOpacity(0.3),
+                                ),
                               ),
                               child: Text(
                                 user?.role.displayName ?? 'Role',
-                                style: const TextStyle(
-                                  color: const Color(0xFF8B5CF6),
+                                style: GoogleFonts.inter(
+                                  color: InternaCrystal.accentPurple,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                  fontSize: 14,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 48),
-                            _buildOptionTile(
-                              context,
-                              icon: Icons.lock_outline,
-                              title: AppStrings.changePassword,
-                              onTap: () => _showChangePasswordDialog(context),
-                            ),
-                            const Divider(),
-                            _buildOptionTile(
-                              context,
-                              icon: Icons.logout,
-                              title: AppStrings.logout,
-                              isDestructive: true,
-                              onTap: () => _showLogoutConfirmation(context),
+                            const SizedBox(height: 40),
+                            // ── Options ──
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                child: Container(
+                                  decoration: InternaCrystal.glassCard(),
+                                  child: Column(
+                                    children: [
+                                      _buildOptionTile(
+                                        context,
+                                        icon: Icons.lock_outline,
+                                        title: AppStrings.changePassword,
+                                        onTap: () => _showChangePasswordDialog(context),
+                                      ),
+                                      Divider(
+                                        height: 1,
+                                        color: InternaCrystal.borderSubtle,
+                                        indent: 56,
+                                      ),
+                                      _buildOptionTile(
+                                        context,
+                                        icon: Icons.logout_rounded,
+                                        title: AppStrings.logout,
+                                        isDestructive: true,
+                                        onTap: () => _showLogoutConfirmation(context),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -157,25 +212,28 @@ class ProfilePage extends StatelessWidget {
     final initial = (user?.name ?? 'U').isNotEmpty
         ? (user?.name ?? 'U').trim()[0].toUpperCase()
         : 'U';
-    
-    return Stack(
-      children: [
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: const Color(0xFF8B5CF6),
-          backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
-          child: avatarUrl == null
-              ? Text(
-                  initial,
-                  style: const TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                )
-              : null,
-        ),
-      ],
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: InternaCrystal.brandGradient,
+      ),
+      child: CircleAvatar(
+        radius: 56,
+        backgroundColor: InternaCrystal.bgCard,
+        backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+        child: avatarUrl == null
+            ? Text(
+                initial,
+                style: GoogleFonts.inter(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: InternaCrystal.textPrimary,
+                ),
+              )
+            : null,
+      ),
     );
   }
 
@@ -191,6 +249,7 @@ class ProfilePage extends StatelessWidget {
           controller: nameController,
           decoration: const InputDecoration(labelText: 'Họ và tên'),
           autofocus: true,
+          style: GoogleFonts.inter(color: InternaCrystal.textPrimary),
         ),
         actions: [
           TextButton(
@@ -226,6 +285,7 @@ class ProfilePage extends StatelessWidget {
             TextField(
               controller: oldPasswordController,
               obscureText: true,
+              style: GoogleFonts.inter(color: InternaCrystal.textPrimary),
               decoration: const InputDecoration(
                 labelText: AppStrings.currentPassword,
               ),
@@ -234,6 +294,7 @@ class ProfilePage extends StatelessWidget {
             TextField(
               controller: passwordController,
               obscureText: true,
+              style: GoogleFonts.inter(color: InternaCrystal.textPrimary),
               decoration: const InputDecoration(
                 labelText: AppStrings.newPassword,
                 hintText: 'Tối thiểu 6 ký tự',
@@ -243,6 +304,7 @@ class ProfilePage extends StatelessWidget {
             TextField(
               controller: confirmController,
               obscureText: true,
+              style: GoogleFonts.inter(color: InternaCrystal.textPrimary),
               decoration: const InputDecoration(
                 labelText: AppStrings.confirmPassword,
               ),
@@ -296,25 +358,31 @@ class ProfilePage extends StatelessWidget {
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
+    final color = isDestructive ? InternaCrystal.accentRed : InternaCrystal.accentPurple;
     return ListTile(
       onTap: onTap,
-      leading: Icon(
-        icon,
-        color: isDestructive ? Colors.red : const Color(0xFF8B5CF6),
-        size: 30,
-      ), // Increased
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: color, size: 22),
+      ),
       title: Text(
         title,
-        style: TextStyle(
-          color: isDestructive ? Colors.red : Colors.black,
+        style: GoogleFonts.inter(
+          color: isDestructive ? InternaCrystal.accentRed : InternaCrystal.textPrimary,
           fontWeight: FontWeight.w600,
-          fontSize: 18, // Increased
+          fontSize: 16,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right, size: 24), // Increased
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8,
-      ), // Increased spacing
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: InternaCrystal.textMuted,
+        size: 22,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
     );
   }
 
@@ -334,10 +402,15 @@ class ProfilePage extends StatelessWidget {
               Navigator.pop(context);
               context.read<ProfileCubit>().logout();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: InternaCrystal.accentRed,
+            ),
+            child: Text(
               AppStrings.logout,
-              style: TextStyle(color: Colors.white),
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../data/model/notification_model.dart';
+import '../../../theme/app_theme.dart';
 
 /// A widget that wraps the main body and shows an in-app banner notification
 /// sliding down from the top whenever a new unread notification arrives.
@@ -55,9 +57,6 @@ class _InAppNotificationOverlayState extends State<InAppNotificationOverlay>
     final newCount = widget.unreadCount;
     final newNotifs = widget.notifications;
 
-    // Show banner in two cases:
-    // 1. First time data loads and there are unread notifications
-    // 2. Unread count increased (new notification arrived)
     final shouldShow =
         newNotifs.isNotEmpty &&
         newCount > 0 &&
@@ -143,35 +142,13 @@ class _BannerCard extends StatelessWidget {
   Color get _iconColor {
     switch (notification.type) {
       case 'REQUEST_APPROVED':
-        return Colors.green.shade600;
+        return InternaCrystal.accentGreen;
       case 'REQUEST_REJECTED':
-        return Colors.red.shade600;
+        return InternaCrystal.accentRed;
       case 'REQUEST_CREATED':
-        return const Color(0xFF8B5CF6);
+        return InternaCrystal.accentPurple;
       default:
-        return const Color(0xFF8B5CF6);
-    }
-  }
-
-  Color get _bgColor {
-    switch (notification.type) {
-      case 'REQUEST_APPROVED':
-        return const Color(0xFFEEFBF3);
-      case 'REQUEST_REJECTED':
-        return const Color(0xFFFFF0F0);
-      default:
-        return const Color(0xFFEDF4FF);
-    }
-  }
-
-  Color get _borderColor {
-    switch (notification.type) {
-      case 'REQUEST_APPROVED':
-        return Colors.green.shade200;
-      case 'REQUEST_REJECTED':
-        return Colors.red.shade200;
-      default:
-        return const Color(0xFF8B5CF6);
+        return InternaCrystal.accentPurple;
     }
   }
 
@@ -182,14 +159,14 @@ class _BannerCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: _bgColor,
+          color: InternaCrystal.bgCard,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _borderColor, width: 1.2),
+          border: Border.all(color: _iconColor.withOpacity(0.3), width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -199,7 +176,7 @@ class _BannerCard extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: _iconColor.withOpacity(0.12),
+                color: _iconColor.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(_icon, color: _iconColor, size: 22),
@@ -212,10 +189,10 @@ class _BannerCard extends StatelessWidget {
                 children: [
                   Text(
                     notification.title,
-                    style: const TextStyle(
+                    style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: Colors.black87,
+                      color: InternaCrystal.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -223,9 +200,9 @@ class _BannerCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     notification.message,
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 12.5,
-                      color: Colors.grey.shade700,
+                      color: InternaCrystal.textSecondary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -236,7 +213,7 @@ class _BannerCard extends StatelessWidget {
             const SizedBox(width: 8),
             GestureDetector(
               onTap: onDismiss,
-              child: Icon(Icons.close, color: Colors.grey.shade500, size: 18),
+              child: Icon(Icons.close, color: InternaCrystal.textMuted, size: 18),
             ),
           ],
         ),

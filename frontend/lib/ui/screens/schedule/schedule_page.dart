@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../di/di_config.dart';
+import '../../theme/app_theme.dart';
 import '../../../../data/model/schedule_request_model.dart';
 import '../../../../data/constant/enums.dart';
 import '../../../../data/service/auth_service.dart';
@@ -45,13 +47,15 @@ class _SchedulePageState extends State<SchedulePage> {
     return BlocProvider.value(
       value: getIt<ScheduleCubit>(),
       child: Scaffold(
+        backgroundColor: InternaCrystal.bgDeep,
         appBar: AppBar(
+          backgroundColor: Colors.transparent,
           flexibleSpace: Container(
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF8B5CF6), Color(0xFF0EA5E9)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+              gradient: InternaCrystal.brandGradient,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
               ),
             ),
           ),
@@ -60,9 +64,10 @@ class _SchedulePageState extends State<SchedulePage> {
             isManagerOrHR
                 ? AppStrings.staffSchedule
                 : AppStrings.myWorkSchedule,
-            style: const TextStyle(
+            style: GoogleFonts.inter(
               fontWeight: FontWeight.bold,
               color: Colors.white,
+              fontSize: 20,
             ),
           ),
           elevation: 0,
@@ -82,30 +87,25 @@ class _SchedulePageState extends State<SchedulePage> {
             },
             child: Column(
               children: [
-                // Global search bar — filters both tabs simultaneously
                 if (isManagerOrHR) _buildSearchBar(),
                 Container(
                   decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF8B5CF6), Color(0xFF0EA5E9)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    gradient: InternaCrystal.brandGradient,
                   ),
-                  child: const TabBar(
+                  child: TabBar(
                     indicatorColor: Colors.white,
                     indicatorWeight: 3,
-                    labelStyle: TextStyle(
+                    labelStyle: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
                       fontSize: 14,
                     ),
-                    unselectedLabelStyle: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white60,
+                    unselectedLabelStyle: GoogleFonts.inter(
+                      fontWeight: FontWeight.w500,
                       fontSize: 13,
                     ),
-                    tabs: [
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white60,
+                    tabs: const [
                       Tab(text: AppStrings.recurringLeave),
                       Tab(text: AppStrings.adhocLeave),
                     ],
@@ -120,18 +120,8 @@ class _SchedulePageState extends State<SchedulePage> {
 
                       return TabBarView(
                         children: [
-                          _buildCalendarTab(
-                            context,
-                            state,
-                            isManagerOrHR,
-                            true,
-                          ),
-                          _buildCalendarTab(
-                            context,
-                            state,
-                            isManagerOrHR,
-                            false,
-                          ),
+                          _buildCalendarTab(context, state, isManagerOrHR, true),
+                          _buildCalendarTab(context, state, isManagerOrHR, false),
                         ],
                       );
                     },
@@ -153,7 +143,6 @@ class _SchedulePageState extends State<SchedulePage> {
   ) {
     final format = isRecurringTab ? CalendarFormat.week : CalendarFormat.month;
 
-    // Filter the schedules by employee name if search is active
     final filteredSchedules = isManagerOrHR && _filterEmployee.isNotEmpty
         ? state.approvedSchedules.where((s) {
             final name = (s.userMetadata?['name'] ?? '')
@@ -165,17 +154,19 @@ class _SchedulePageState extends State<SchedulePage> {
 
     return RefreshIndicator(
       onRefresh: () => context.read<ScheduleCubit>().loadSchedules(_userRole),
+      color: InternaCrystal.accentPurple,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth >= 800;
-          final calendarWidget = Card(
+          final calendarWidget = Container(
             margin: EdgeInsets.zero,
-            elevation: 4,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: InternaCrystal.bgCard.withOpacity(0.6),
+              borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
               ),
+              border: Border.all(color: InternaCrystal.borderSubtle),
             ),
             child: Column(
               children: [
@@ -192,26 +183,57 @@ class _SchedulePageState extends State<SchedulePage> {
                   },
                   locale: 'vi',
                   rowHeight: format == CalendarFormat.week ? 180 : 80,
-                  headerStyle: const HeaderStyle(
+                  headerStyle: HeaderStyle(
                     formatButtonVisible: false,
                     titleCentered: true,
-                    titleTextStyle: TextStyle(
-                      fontSize: 20,
+                    titleTextStyle: GoogleFonts.inter(
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF8B5CF6),
+                      color: InternaCrystal.accentPurple,
                     ),
                   ),
                   daysOfWeekHeight: 45,
                   daysOfWeekStyle: DaysOfWeekStyle(
-                    weekdayStyle: TextStyle(
+                    weekdayStyle: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.grey.shade700,
+                      fontSize: 14,
+                      color: InternaCrystal.textSecondary,
                     ),
-                    weekendStyle: const TextStyle(
+                    weekendStyle: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.redAccent,
+                      fontSize: 14,
+                      color: InternaCrystal.accentRed.withOpacity(0.7),
+                    ),
+                  ),
+                  calendarStyle: CalendarStyle(
+                    defaultTextStyle: GoogleFonts.inter(
+                      color: InternaCrystal.textPrimary,
+                      fontSize: 15,
+                    ),
+                    todayTextStyle: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    todayDecoration: BoxDecoration(
+                      color: InternaCrystal.accentPurple.withOpacity(0.6),
+                      shape: BoxShape.circle,
+                    ),
+                    selectedTextStyle: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    selectedDecoration: const BoxDecoration(
+                      color: InternaCrystal.accentPurple,
+                      shape: BoxShape.circle,
+                    ),
+                    outsideTextStyle: GoogleFonts.inter(
+                      color: InternaCrystal.textMuted,
+                    ),
+                    weekendTextStyle: GoogleFonts.inter(
+                      color: InternaCrystal.textMuted,
+                      fontSize: 15,
                     ),
                   ),
                   selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
@@ -234,12 +256,12 @@ class _SchedulePageState extends State<SchedulePage> {
                       return Center(
                         child: Text(
                           text,
-                          style: TextStyle(
+                          style: GoogleFonts.inter(
                             color: day.weekday == DateTime.sunday
-                                ? Colors.redAccent
-                                : Colors.grey.shade700,
+                                ? InternaCrystal.accentRed.withOpacity(0.7)
+                                : InternaCrystal.textSecondary,
                             fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                            fontSize: 13,
                           ),
                         ),
                       );
@@ -317,23 +339,16 @@ class _SchedulePageState extends State<SchedulePage> {
                           child: Column(
                             children: [
                               _buildLegend(isManagerOrHR),
-                              Container(
-                                decoration: BoxDecoration(
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 10),
-                                    ),
-                                  ],
-                                ),
-                                child: calendarWidget,
-                              ),
+                              calendarWidget,
                             ],
                           ),
                         ),
                       ),
-                      const VerticalDivider(width: 1, thickness: 1),
+                      VerticalDivider(
+                        width: 1,
+                        thickness: 1,
+                        color: InternaCrystal.borderSubtle,
+                      ),
                       Expanded(
                         flex: 7,
                         child: Column(
@@ -341,29 +356,41 @@ class _SchedulePageState extends State<SchedulePage> {
                           children: [
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                border: Border(bottom: BorderSide(color: Color(0xFFF3F4F6))),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 20,
+                              ),
+                              decoration: BoxDecoration(
+                                color: InternaCrystal.bgCard.withOpacity(0.5),
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: InternaCrystal.borderSubtle,
+                                  ),
+                                ),
                               ),
                               child: Row(
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF8B5CF6).withOpacity(0.1),
+                                      color: InternaCrystal.accentPurple.withOpacity(0.15),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: const Icon(Icons.event_note_rounded, color: Color(0xFF8B5CF6), size: 20),
+                                    child: const Icon(
+                                      Icons.event_note_rounded,
+                                      color: InternaCrystal.accentPurple,
+                                      size: 20,
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
                                     _selectedDay != null
                                         ? 'Lịch trình ngày ${DateFormat('dd/MM', 'vi').format(_selectedDay!)}'
                                         : 'Chọn một ngày',
-                                    style: const TextStyle(
-                                      fontSize: 18,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
                                       fontWeight: FontWeight.bold,
+                                      color: InternaCrystal.textPrimary,
                                       letterSpacing: -0.5,
                                     ),
                                   ),
@@ -372,7 +399,7 @@ class _SchedulePageState extends State<SchedulePage> {
                             ),
                             Expanded(
                               child: Container(
-                                color: const Color(0xFFF9FAFB),
+                                color: InternaCrystal.bgDeep,
                                 child: eventListWidget,
                               ),
                             ),
@@ -392,12 +419,12 @@ class _SchedulePageState extends State<SchedulePage> {
               children: [
                 _buildLegend(isManagerOrHR),
                 calendarWidget,
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Divider(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Divider(color: InternaCrystal.borderSubtle),
                 ),
                 SizedBox(
-                  height: 400, // Fixed height on mobile for scrollable list
+                  height: 400,
                   child: eventListWidget,
                 ),
               ],
@@ -409,7 +436,6 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildDesktopStats(ScheduleState state, bool isManagerOrHR) {
-    // Basic stats calculation for demo
     final today = DateTime.now();
     final todaySchedules = _getSchedulesForDay(state.approvedSchedules, today);
     final leaveCount = todaySchedules.where((s) => s.type == ScheduleType.LEAVE).length;
@@ -424,7 +450,7 @@ class _SchedulePageState extends State<SchedulePage> {
             '$leaveCount',
             'Hôm nay',
             Icons.beach_access_rounded,
-            const Color(0xFF8B5CF6),
+            InternaCrystal.accentPurple,
           ),
           const SizedBox(width: 20),
           _buildStatCard(
@@ -432,7 +458,7 @@ class _SchedulePageState extends State<SchedulePage> {
             '$workCount',
             'Tổng cộng nhân sự',
             Icons.work_rounded,
-            const Color(0xFF0EA5E9),
+            InternaCrystal.accentBlue,
           ),
         ],
       ),
@@ -444,26 +470,19 @@ class _SchedulePageState extends State<SchedulePage> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: InternaCrystal.bgCard.withOpacity(0.6),
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.08),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
-          border: Border.all(color: color.withOpacity(0.1)),
+          border: Border.all(color: color.withOpacity(0.2)),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 26),
+              child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(width: 20),
             Column(
@@ -471,16 +490,28 @@ class _SchedulePageState extends State<SchedulePage> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: InternaCrystal.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: -1),
+                  style: GoogleFonts.inter(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: InternaCrystal.textPrimary,
+                    letterSpacing: -1,
+                  ),
                 ),
                 Text(
                   sub,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: InternaCrystal.textMuted,
+                  ),
                 ),
               ],
             ),
@@ -491,172 +522,156 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Widget _buildCustomCalendarHeader(CalendarFormat format) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF8B5CF6).withOpacity(0.03),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                const Icon(Icons.calendar_month_rounded, color: Color(0xFF8B5CF6), size: 22),
-                const SizedBox(width: 10),
-                Text(
-                  DateFormat.yMMMM('vi').format(_focusedDay).toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF8B5CF6),
-                    letterSpacing: 0.5,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 400;
+        
+        return Container(
+          padding: EdgeInsets.fromLTRB(isNarrow ? 12 : 24, 20, isNarrow ? 12 : 24, 12),
+          decoration: BoxDecoration(
+            color: InternaCrystal.accentPurple.withOpacity(0.05),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
             ),
           ),
-          const SizedBox(width: 8),
-          Row(
+          child: Column(
             children: [
-              InkWell(
-                onTap: () {
-                  setState(() {
-                    _focusedDay = DateTime.now();
-                    _selectedDay = DateTime.now();
-                  });
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_month_rounded, color: InternaCrystal.accentPurple, size: 18),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            DateFormat.yMMMM('vi').format(_focusedDay).toUpperCase(),
+                            style: GoogleFonts.inter(
+                              fontSize: isNarrow ? 14 : 16,
+                              fontWeight: FontWeight.w800,
+                              color: InternaCrystal.accentPurple,
+                              letterSpacing: 0.5,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                  const SizedBox(width: 8),
+                  Row(
+                    children: [
+                      _buildNavButton(
+                        icon: Icons.chevron_left,
+                        onTap: () {
+                          setState(() {
+                            if (format == CalendarFormat.week) {
+                              _focusedDay = _focusedDay.subtract(const Duration(days: 7));
+                            } else {
+                              _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1, _focusedDay.day);
+                            }
+                          });
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      _buildNavButton(
+                        icon: Icons.chevron_right,
+                        onTap: () {
+                          setState(() {
+                            if (format == CalendarFormat.week) {
+                              _focusedDay = _focusedDay.add(const Duration(days: 7));
+                            } else {
+                              _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1, _focusedDay.day);
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              if (isNarrow) const SizedBox(height: 12),
+              if (isNarrow)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _focusedDay = DateTime.now();
+                        _selectedDay = DateTime.now();
+                      });
+                    },
                     borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: InternaCrystal.bgElevated,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: InternaCrystal.borderSubtle),
+                      ),
+                      child: Text(
+                        AppStrings.today,
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: InternaCrystal.textPrimary,
+                        ),
+                      ),
+                    ),
                   ),
-                  child: const Text(
-                    AppStrings.today,
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              InkWell(
-                onTap: () {
-                  setState(() {
-                    if (format == CalendarFormat.week) {
-                      _focusedDay = _focusedDay.subtract(
-                        const Duration(days: 7),
-                      );
-                    } else {
-                      _focusedDay = DateTime(
-                        _focusedDay.year,
-                        _focusedDay.month - 1,
-                        _focusedDay.day,
-                      );
-                    }
-                  });
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE0E0E0), // Colors.grey.shade300
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.chevron_left,
-                    size: 20,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              InkWell(
-                onTap: () {
-                  setState(() {
-                    if (format == CalendarFormat.week) {
-                      _focusedDay = _focusedDay.add(const Duration(days: 7));
-                    } else {
-                      _focusedDay = DateTime(
-                        _focusedDay.year,
-                        _focusedDay.month + 1,
-                        _focusedDay.day,
-                      );
-                    }
-                  });
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE0E0E0), // Colors.grey.shade300
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.chevron_right,
-                    size: 20,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
+                )
+              else
+                const SizedBox.shrink(),
             ],
           ),
-        ],
+        );
+      }
+    );
+  }
+
+  Widget _buildNavButton({required IconData icon, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: InternaCrystal.bgElevated,
+          shape: BoxShape.circle,
+          border: Border.all(color: InternaCrystal.borderSubtle),
+        ),
+        child: Icon(icon, size: 18, color: InternaCrystal.textPrimary),
       ),
     );
   }
 
   Widget _buildSearchBar() {
     return Container(
-      color: Colors.white,
+      color: InternaCrystal.bgCard.withOpacity(0.5),
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
       child: TextField(
         controller: _searchController,
         onChanged: (value) => setState(() => _filterEmployee = value),
+        style: GoogleFonts.inter(color: InternaCrystal.textPrimary),
         decoration: InputDecoration(
           hintText: 'Tìm theo tên...',
-          hintStyle: TextStyle(fontSize: 16, color: Colors.grey.shade400),
+          hintStyle: GoogleFonts.inter(fontSize: 14, color: InternaCrystal.textMuted),
           prefixIcon: const Icon(
             Icons.person_search_rounded,
-            color: Color(0xFF8B5CF6),
-            size: 24,
+            color: InternaCrystal.accentPurple,
+            size: 22,
           ),
           suffixIcon: _filterEmployee.isNotEmpty
               ? IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    size: 18,
-                    color: Colors.grey.shade500,
-                  ),
+                  icon: Icon(Icons.clear, size: 18, color: InternaCrystal.textMuted),
                   onPressed: () {
                     _searchController.clear();
                     setState(() => _filterEmployee = '');
                   },
                 )
               : null,
-          filled: true,
-          fillColor: Colors.grey.shade50,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade200),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade200),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF8B5CF6), width: 1.5),
-          ),
         ),
       ),
     );
@@ -673,22 +688,18 @@ class _SchedulePageState extends State<SchedulePage> {
     final hasSchedules = daySchedules.isNotEmpty;
 
     final morningCount = daySchedules
-        .where(
-          (s) =>
-              s.shift == 'MORNING' ||
-              s.shift == 'SÁNG' ||
-              s.shift == 'ALL_DAY' ||
-              s.shift == 'CẢ NGÀY',
-        )
+        .where((s) =>
+            s.shift == 'MORNING' ||
+            s.shift == 'SÁNG' ||
+            s.shift == 'ALL_DAY' ||
+            s.shift == 'CẢ NGÀY')
         .length;
     final afternoonCount = daySchedules
-        .where(
-          (s) =>
-              s.shift == 'AFTERNOON' ||
-              s.shift == 'CHIỀU' ||
-              s.shift == 'ALL_DAY' ||
-              s.shift == 'CẢ NGÀY',
-        )
+        .where((s) =>
+            s.shift == 'AFTERNOON' ||
+            s.shift == 'CHIỀU' ||
+            s.shift == 'ALL_DAY' ||
+            s.shift == 'CẢ NGÀY')
         .length;
 
     final isWeekend =
@@ -698,26 +709,26 @@ class _SchedulePageState extends State<SchedulePage> {
     Color bgColor;
     Color borderColor;
     if (isSelected) {
-      bgColor = const Color(0xFF8B5CF6);
+      bgColor = InternaCrystal.accentPurple;
       dayNumColor = Colors.white;
-      borderColor = const Color(0xFF8B5CF6);
+      borderColor = InternaCrystal.accentPurple;
     } else if (isToday) {
-      bgColor = const Color(0xFF8B5CF6);
-      dayNumColor =
-          Colors.white; // Changed from Color(0xFF8B5CF6) to white for contrast
-      borderColor = const Color(0xFF8B5CF6);
+      bgColor = InternaCrystal.accentPurple.withOpacity(0.3);
+      dayNumColor = Colors.white;
+      borderColor = InternaCrystal.accentPurple;
     } else if (isWeekend) {
-      bgColor = Colors.grey.shade50;
-      dayNumColor = Colors.grey.shade400;
+      bgColor = InternaCrystal.bgCard.withOpacity(0.3);
+      dayNumColor = InternaCrystal.textMuted;
       borderColor = Colors.transparent;
     } else {
       bgColor = Colors.transparent;
-      dayNumColor = Colors.black87;
+      dayNumColor = InternaCrystal.textPrimary;
       borderColor = Colors.transparent;
     }
 
-    // Divider color
-    final dividerColor = isSelected ? Colors.white24 : Colors.grey.shade200;
+    final dividerColor = isSelected
+        ? Colors.white24
+        : InternaCrystal.borderSubtle;
 
     return GestureDetector(
       onTap: () {
@@ -736,20 +747,18 @@ class _SchedulePageState extends State<SchedulePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Day number header -- same size always
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
                 '${day.day}',
-                style: TextStyle(
-                  fontSize: 18,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: dayNumColor,
                 ),
               ),
             ),
             const SizedBox(height: 6),
-            // Always render divider
             Container(
               height: 1,
               margin: const EdgeInsets.symmetric(horizontal: 6),
@@ -759,8 +768,8 @@ class _SchedulePageState extends State<SchedulePage> {
             _buildShiftBadge(
               label: 'SA',
               count: hasSchedules ? morningCount : 0,
-              color: const Color(0xFF8B5CF6),
-              bgColor: const Color(0xFF8B5CF6).withOpacity(0.12),
+              color: InternaCrystal.accentPurple,
+              bgColor: InternaCrystal.accentPurple.withOpacity(0.15),
               isSelected: isSelected,
               isEmpty: !hasSchedules,
             ),
@@ -768,8 +777,8 @@ class _SchedulePageState extends State<SchedulePage> {
             _buildShiftBadge(
               label: 'CH',
               count: hasSchedules ? afternoonCount : 0,
-              color: Colors.orange.shade700,
-              bgColor: Colors.orange.shade50,
+              color: InternaCrystal.accentOrange,
+              bgColor: InternaCrystal.accentOrange.withOpacity(0.15),
               isSelected: isSelected,
               isEmpty: !hasSchedules,
             ),
@@ -779,7 +788,6 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  /// Compact square badge for SA/CH in week day cells
   Widget _buildShiftBadge({
     required String label,
     required int count,
@@ -791,13 +799,12 @@ class _SchedulePageState extends State<SchedulePage> {
     final isIntern = _userRole == UserRole.INTERN;
     final hasMark = count > 0;
 
-    // Faded placeholder when empty
     final badgeColor = isEmpty || !hasMark
-        ? (isSelected ? Colors.white.withOpacity(0.1) : Colors.grey.shade100)
+        ? (isSelected ? Colors.white.withOpacity(0.1) : InternaCrystal.bgCard.withOpacity(0.3))
         : (isSelected ? Colors.white.withOpacity(0.22) : bgColor);
 
     final labelColor = isEmpty || !hasMark
-        ? (isSelected ? Colors.white24 : Colors.grey.shade300)
+        ? (isSelected ? Colors.white24 : InternaCrystal.textMuted)
         : (isSelected ? Colors.white : color);
 
     return Padding(
@@ -814,26 +821,34 @@ class _SchedulePageState extends State<SchedulePage> {
               ? MainAxisAlignment.center
               : MainAxisAlignment.spaceBetween,
           children: [
-            Padding(
-              padding: EdgeInsets.only(left: (isIntern || !hasMark) ? 0 : 6),
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: labelColor,
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Padding(
+                  padding: EdgeInsets.only(left: (isIntern || !hasMark) ? 0 : 6),
+                  child: Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: labelColor,
+                    ),
+                  ),
                 ),
               ),
             ),
             if (!isIntern && hasMark)
               Padding(
                 padding: const EdgeInsets.only(right: 6),
-                child: Text(
-                  '$count',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    color: isSelected ? Colors.white : color,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '$count',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      color: isSelected ? Colors.white : color,
+                    ),
                   ),
                 ),
               ),
@@ -847,13 +862,10 @@ class _SchedulePageState extends State<SchedulePage> {
     List<ScheduleRequestModel> items,
     bool isManagerOrHR,
   ) {
-    final leaveItems = items
-        .where((s) => s.type == ScheduleType.LEAVE)
-        .toList();
+    final leaveItems = items.where((s) => s.type == ScheduleType.LEAVE).toList();
     final hasLeave = leaveItems.isNotEmpty;
     final hasWork = items.any((s) => s.type == ScheduleType.WORK);
 
-    // Count unique employees on leave (for manager/HR view)
     final leaveCount = isManagerOrHR
         ? leaveItems.map((s) => s.employeeId).toSet().length
         : 0;
@@ -869,23 +881,23 @@ class _SchedulePageState extends State<SchedulePage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8B5CF6), // Changed from red
+                  color: InternaCrystal.accentPurple,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '$leaveCount',
-                  style: const TextStyle(
+                  style: GoogleFonts.inter(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     height: 1.2,
                   ),
                 ),
               ),
             ] else
-              _dot(const Color(0xFF8B5CF6)), // Changed from red
+              _dot(InternaCrystal.accentPurple),
           ],
-          if (hasWork) _dot(const Color(0xFF8B5CF6)),
+          if (hasWork) _dot(InternaCrystal.accentBlue),
         ],
       ),
     );
@@ -896,9 +908,7 @@ class _SchedulePageState extends State<SchedulePage> {
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Simplified legend as requested, only showing colors
-        ],
+        children: [],
       ),
     );
   }
@@ -918,11 +928,7 @@ class _SchedulePageState extends State<SchedulePage> {
   ) {
     return schedules.where((s) {
       final date = DateTime(day.year, day.month, day.day);
-      final start = DateTime(
-        s.startDate.year,
-        s.startDate.month,
-        s.startDate.day,
-      );
+      final start = DateTime(s.startDate.year, s.startDate.month, s.startDate.day);
       final end = DateTime(s.endDate.year, s.endDate.month, s.endDate.day);
 
       bool isInRange =
@@ -940,61 +946,35 @@ class _SchedulePageState extends State<SchedulePage> {
     }).toList();
   }
 
-  /// This MUST match the values stored in the database (English)
   String _getWeekdayString(int day) {
     switch (day) {
-      case DateTime.monday:
-        return 'MONDAY';
-      case DateTime.tuesday:
-        return 'TUESDAY';
-      case DateTime.wednesday:
-        return 'WEDNESDAY';
-      case DateTime.thursday:
-        return 'THURSDAY';
-      case DateTime.friday:
-        return 'FRIDAY';
-      case DateTime.saturday:
-        return 'SATURDAY';
-      case DateTime.sunday:
-        return 'SUNDAY';
-      default:
-        return '';
+      case DateTime.monday: return 'MONDAY';
+      case DateTime.tuesday: return 'TUESDAY';
+      case DateTime.wednesday: return 'WEDNESDAY';
+      case DateTime.thursday: return 'THURSDAY';
+      case DateTime.friday: return 'FRIDAY';
+      case DateTime.saturday: return 'SATURDAY';
+      case DateTime.sunday: return 'SUNDAY';
+      default: return '';
     }
   }
 
-  /// Display-only: convert DB weekday value to short Vietnamese label
   String _weekdayDisplayName(String dbValue) {
     switch (dbValue.toUpperCase()) {
-      case 'MONDAY':
-      case 'THỨ 2':
-        return 'ThỨ 2';
-      case 'TUESDAY':
-      case 'THỨ 3':
-        return 'ThỨ 3';
-      case 'WEDNESDAY':
-      case 'THỨ 4':
-        return 'ThỨ 4';
-      case 'THURSDAY':
-      case 'THỨ 5':
-        return 'ThỨ 5';
-      case 'FRIDAY':
-      case 'THỨ 6':
-        return 'ThỨ 6';
-      case 'SATURDAY':
-      case 'THỨ 7':
-        return 'ThỨ 7';
-      case 'SUNDAY':
-      case 'CHỦ NHẬT':
-        return 'Chủ nhật';
-      default:
-        return dbValue;
+      case 'MONDAY': case 'THỨ 2': return 'Thứ 2';
+      case 'TUESDAY': case 'THỨ 3': return 'Thứ 3';
+      case 'WEDNESDAY': case 'THỨ 4': return 'Thứ 4';
+      case 'THURSDAY': case 'THỨ 5': return 'Thứ 5';
+      case 'FRIDAY': case 'THỨ 6': return 'Thứ 6';
+      case 'SATURDAY': case 'THỨ 7': return 'Thứ 7';
+      case 'SUNDAY': case 'CHỦ NHẬT': return 'Chủ nhật';
+      default: return dbValue;
     }
   }
 
-  /// Match s.weekday (DB value, may be English or Vietnamese) against a DateTime weekday int
   bool _weekdayMatches(String? storedWeekday, int dateWeekday) {
     if (storedWeekday == null) return false;
-    final engName = _getWeekdayString(dateWeekday); // e.g. 'MONDAY'
+    final engName = _getWeekdayString(dateWeekday);
     final viMap = <String, String>{
       'MONDAY': 'THỨ 2',
       'TUESDAY': 'THỨ 3',
@@ -1022,11 +1002,11 @@ class _SchedulePageState extends State<SchedulePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.event_busy, size: 48, color: Colors.grey.shade400),
+            Icon(Icons.event_busy, size: 48, color: InternaCrystal.textMuted),
             const SizedBox(height: 8),
             Text(
               '${AppStrings.noSchedulesFor} ${DateFormat('EEEE, d/M', 'vi').format(_selectedDay ?? _focusedDay)}',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: GoogleFonts.inter(color: InternaCrystal.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1040,47 +1020,58 @@ class _SchedulePageState extends State<SchedulePage> {
       itemBuilder: (context, index) {
         final req = filteredEvents[index];
         final isLeave = req.type == ScheduleType.LEAVE;
-        final shiftColor =
-            _getColorForShift(req.shift) ?? const Color(0xFF8B5CF6);
+        final shiftColor = _getColorForShift(req.shift) ?? InternaCrystal.accentPurple;
         final statusColor = req.status == RequestStatus.APPROVED
-            ? Colors.green
+            ? InternaCrystal.accentGreen
             : (req.status == RequestStatus.PENDING
-                  ? Colors.orange
-                  : Colors.red);
+                  ? InternaCrystal.accentOrange
+                  : InternaCrystal.accentRed);
 
-        return Card(
+        return Container(
           margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: shiftColor.withOpacity(0.2)),
+          decoration: BoxDecoration(
+            color: InternaCrystal.bgCard.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: shiftColor.withOpacity(0.2)),
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 8,
             ),
-            leading: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  isLeave ? Icons.beach_access : Icons.work_outline,
-                  color: shiftColor,
-                ),
-                Text(
-                  req.shift,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+            leading: SizedBox(
+              width: 48,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    isLeave ? Icons.beach_access : Icons.work_outline,
                     color: shiftColor,
+                    size: 20,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      req.shift,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: shiftColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             title: Text(
               isManagerOrHR
                   ? (req.userMetadata?['name'] ?? AppStrings.staff)
                   : (isLeave ? AppStrings.personalLeave : AppStrings.myShift),
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold,
+                color: InternaCrystal.textPrimary,
+              ),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1090,12 +1081,12 @@ class _SchedulePageState extends State<SchedulePage> {
                     padding: const EdgeInsets.only(top: 4, bottom: 4),
                     child: Text(
                       req.description!,
-                      style: TextStyle(
-                        fontSize: isManagerOrHR ? 16 : 14,
+                      style: GoogleFonts.inter(
+                        fontSize: isManagerOrHR ? 14 : 13,
                         fontWeight: isManagerOrHR
                             ? FontWeight.w600
                             : FontWeight.normal,
-                        color: Colors.black87,
+                        color: InternaCrystal.textSecondary,
                       ),
                     ),
                   ),
@@ -1106,7 +1097,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       const SizedBox(width: 4),
                       Text(
                         req.status.displayName,
-                        style: TextStyle(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           color: statusColor,
                           fontWeight: FontWeight.w500,
@@ -1117,14 +1108,14 @@ class _SchedulePageState extends State<SchedulePage> {
                         Icon(
                           Icons.repeat,
                           size: 12,
-                          color: Colors.grey.shade600,
+                          color: InternaCrystal.textMuted,
                         ),
                         const SizedBox(width: 2),
                         Text(
                           _weekdayDisplayName(req.weekday!),
-                          style: TextStyle(
+                          style: GoogleFonts.inter(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: InternaCrystal.textMuted,
                           ),
                         ),
                       ],
@@ -1134,7 +1125,10 @@ class _SchedulePageState extends State<SchedulePage> {
             ),
             trailing: isManagerOrHR
                 ? IconButton(
-                    icon: const Icon(Icons.info_outline),
+                    icon: Icon(
+                      Icons.info_outline,
+                      color: InternaCrystal.textSecondary,
+                    ),
                     onPressed: () {
                       _showRequestDetails(context, req);
                     },
@@ -1148,12 +1142,11 @@ class _SchedulePageState extends State<SchedulePage> {
 
   Color? _getColorForShift(String shift) {
     if (shift == AppStrings.morning || shift.toUpperCase() == 'SÁNG') {
-      return Colors.cyan.shade800;
-    } else if (shift == AppStrings.afternoon ||
-        shift.toUpperCase() == 'CHIỀU') {
-      return Colors.deepOrange.shade700;
+      return InternaCrystal.accentBlue;
+    } else if (shift == AppStrings.afternoon || shift.toUpperCase() == 'CHIỀU') {
+      return InternaCrystal.accentOrange;
     } else if (shift == AppStrings.allDay || shift.toUpperCase() == 'CẢ NGÀY') {
-      return const Color(0xFF8B5CF6);
+      return InternaCrystal.accentPurple;
     }
     return null;
   }

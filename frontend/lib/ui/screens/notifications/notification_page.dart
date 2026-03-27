@@ -1,6 +1,8 @@
+import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'cubit/notification_cubit.dart';
 import 'cubit/notification_state.dart';
@@ -11,6 +13,7 @@ import '../../../../data/model/schedule_request_model.dart';
 import '../../../../data/repo/schedule_request_repo.dart';
 import '../../di/di_config.dart';
 import '../../router/app_router.gr.dart';
+import '../../theme/app_theme.dart';
 import '../home/cubit/home_cubit.dart';
 import '../main/cubit/main_cubit.dart';
 
@@ -32,9 +35,8 @@ class _NotificationPageState extends State<NotificationPage> {
     super.initState();
     _notifCubit = getIt<NotificationCubit>()
       ..loadNotifications().then((_) {
-        // Mark all as read after loading — updates badge & prevents re-trigger of banner
         _notifCubit.markAllAsRead();
-        getIt<HomeCubit>().loadData(); // refresh badge count on home
+        getIt<HomeCubit>().loadData();
       });
     _loadPendingIfManager();
   }
@@ -75,30 +77,35 @@ class _NotificationPageState extends State<NotificationPage> {
     return BlocProvider.value(
       value: _notifCubit,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF0F2F5),
-          appBar: AppBar(
-            flexibleSpace: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF8B5CF6), Color(0xFF0EA5E9)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+        backgroundColor: InternaCrystal.bgDeep,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: InternaCrystal.brandGradient,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
               ),
             ),
-            centerTitle: true,
-            title: const Text(
-              AppStrings.notifications,
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            foregroundColor: Colors.white,
-            elevation: 0,
           ),
+          centerTitle: true,
+          title: Text(
+            AppStrings.notifications,
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 20,
+            ),
+          ),
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
         body: BlocBuilder<NotificationCubit, NotificationState>(
           builder: (context, state) {
             return RefreshIndicator(
               onRefresh: _onRefresh,
+              color: InternaCrystal.accentPurple,
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 800),
@@ -109,15 +116,15 @@ class _NotificationPageState extends State<NotificationPage> {
                       if (isManagerOrHR) ...[
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                            padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
                             child: Row(
                               children: [
-                                const Text(
+                                Text(
                                   'Yêu cầu chờ duyệt',
-                                  style: TextStyle(
-                                    fontSize: 17,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                                    color: InternaCrystal.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -125,15 +132,15 @@ class _NotificationPageState extends State<NotificationPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
-                                      vertical: 2,
+                                      vertical: 3,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.red,
+                                      color: InternaCrystal.accentRed,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
                                       '${_pendingGroups.length}',
-                                      style: const TextStyle(
+                                      style: GoogleFonts.inter(
                                         color: Colors.white,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
@@ -154,25 +161,22 @@ class _NotificationPageState extends State<NotificationPage> {
                         else if (_pendingGroups.isEmpty)
                           SliverToBoxAdapter(
                             child: Container(
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
+                              margin: const EdgeInsets.symmetric(horizontal: 16),
                               padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
+                              decoration: InternaCrystal.glassCard(),
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.check_circle_outline,
-                                    color: Colors.green.shade400,
-                                    size: 28,
+                                    color: InternaCrystal.accentGreen,
+                                    size: 24,
                                   ),
                                   const SizedBox(width: 12),
-                                  const Text(
+                                  Text(
                                     AppStrings.noPendingRequests,
-                                    style: TextStyle(color: Colors.grey),
+                                    style: GoogleFonts.inter(
+                                      color: InternaCrystal.textSecondary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -186,11 +190,7 @@ class _NotificationPageState extends State<NotificationPage> {
                             ) {
                               final item = _pendingGroups[index];
                               if (item is List<ScheduleRequestModel>) {
-                                return _buildPendingGroupCard(
-                                  context,
-                                  item,
-                                  role,
-                                );
+                                return _buildPendingGroupCard(context, item, role);
                               }
                               return _buildPendingSingleCard(
                                 context,
@@ -200,15 +200,15 @@ class _NotificationPageState extends State<NotificationPage> {
                             }, childCount: _pendingGroups.length),
                           ),
                         const SliverToBoxAdapter(child: SizedBox(height: 8)),
-                        const SliverToBoxAdapter(
+                        SliverToBoxAdapter(
                           child: Padding(
-                            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                             child: Text(
                               'Thông báo',
-                              style: TextStyle(
-                                fontSize: 17,
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: InternaCrystal.textPrimary,
                               ),
                             ),
                           ),
@@ -217,15 +217,15 @@ class _NotificationPageState extends State<NotificationPage> {
 
                       // ── For Interns: section header ──
                       if (!isManagerOrHR)
-                        const SliverToBoxAdapter(
+                        SliverToBoxAdapter(
                           child: Padding(
-                            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                            padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
                             child: Text(
                               'Thông báo',
-                              style: TextStyle(
-                                fontSize: 17,
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: InternaCrystal.textPrimary,
                               ),
                             ),
                           ),
@@ -247,21 +247,20 @@ class _NotificationPageState extends State<NotificationPage> {
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 16),
                             padding: const EdgeInsets.all(32),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                            decoration: InternaCrystal.glassCard(),
                             child: Column(
                               children: [
                                 Icon(
-                                  Icons.notifications_none,
+                                  Icons.notifications_none_rounded,
                                   size: 48,
-                                  color: Colors.grey.shade400,
+                                  color: InternaCrystal.textMuted,
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
                                   AppStrings.noNotifications,
-                                  style: TextStyle(color: Colors.grey.shade600),
+                                  style: GoogleFonts.inter(
+                                    color: InternaCrystal.textSecondary,
+                                  ),
                                 ),
                               ],
                             ),
@@ -302,22 +301,12 @@ class _NotificationPageState extends State<NotificationPage> {
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: InternaCrystal.glassCard(),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           onTap: () => _navigateToUserRequests(context, first, role),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -327,14 +316,14 @@ class _NotificationPageState extends State<NotificationPage> {
                 Stack(
                   children: [
                     CircleAvatar(
-                      radius: 28,
-                      backgroundColor: const Color(0xFFE8E9FD),
+                      radius: 24,
+                      backgroundColor: InternaCrystal.accentPurple.withOpacity(0.2),
                       child: Text(
                         avatarLetter,
-                        style: TextStyle(
-                          fontSize: 20,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF8B5CF6),
+                          color: InternaCrystal.accentPurple,
                         ),
                       ),
                     ),
@@ -342,16 +331,16 @@ class _NotificationPageState extends State<NotificationPage> {
                       bottom: 0,
                       right: 0,
                       child: Container(
-                        width: 20,
-                        height: 20,
+                        width: 18,
+                        height: 18,
                         decoration: BoxDecoration(
-                          color: Colors.orange,
+                          color: InternaCrystal.accentOrange,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: InternaCrystal.bgCard, width: 2),
                         ),
                         child: const Icon(
                           Icons.pending_actions,
-                          size: 10,
+                          size: 9,
                           color: Colors.white,
                         ),
                       ),
@@ -365,17 +354,14 @@ class _NotificationPageState extends State<NotificationPage> {
                     children: [
                       RichText(
                         text: TextSpan(
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 18,
+                          style: GoogleFonts.inter(
+                            color: InternaCrystal.textPrimary,
+                            fontSize: 15,
                           ),
                           children: [
                             TextSpan(
                               text: userName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             TextSpan(
                               text: isRecurring
@@ -385,12 +371,12 @@ class _NotificationPageState extends State<NotificationPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(
                         'Ca: ${first.shift}  •  $timeAgo',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.orange.shade700,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: InternaCrystal.accentOrange,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -398,7 +384,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                Icon(Icons.chevron_right, color: InternaCrystal.textMuted, size: 20),
               ],
             ),
           ),
@@ -418,22 +404,12 @@ class _NotificationPageState extends State<NotificationPage> {
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: InternaCrystal.glassCard(),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           onTap: () => _navigateToUserRequests(context, req, role),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -443,14 +419,14 @@ class _NotificationPageState extends State<NotificationPage> {
                 Stack(
                   children: [
                     CircleAvatar(
-                      radius: 28,
-                      backgroundColor: const Color(0xFFE8E9FD),
+                      radius: 24,
+                      backgroundColor: InternaCrystal.accentPurple.withOpacity(0.2),
                       child: Text(
                         avatarLetter,
-                        style: TextStyle(
-                          fontSize: 20,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF8B5CF6),
+                          color: InternaCrystal.accentPurple,
                         ),
                       ),
                     ),
@@ -458,16 +434,16 @@ class _NotificationPageState extends State<NotificationPage> {
                       bottom: 0,
                       right: 0,
                       child: Container(
-                        width: 20,
-                        height: 20,
+                        width: 18,
+                        height: 18,
                         decoration: BoxDecoration(
-                          color: Colors.orange,
+                          color: InternaCrystal.accentOrange,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: InternaCrystal.bgCard, width: 2),
                         ),
                         child: const Icon(
                           Icons.pending_actions,
-                          size: 10,
+                          size: 9,
                           color: Colors.white,
                         ),
                       ),
@@ -481,28 +457,25 @@ class _NotificationPageState extends State<NotificationPage> {
                     children: [
                       RichText(
                         text: TextSpan(
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 16,
+                          style: GoogleFonts.inter(
+                            color: InternaCrystal.textPrimary,
+                            fontSize: 15,
                           ),
                           children: [
                             TextSpan(
                               text: userName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             const TextSpan(text: ' đã gửi yêu cầu nghỉ'),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(
                         'Ca: ${req.shift}  •  $timeAgo',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.orange.shade700,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: InternaCrystal.accentOrange,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -510,7 +483,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                Icon(Icons.chevron_right, color: InternaCrystal.textMuted, size: 20),
               ],
             ),
           ),
@@ -527,15 +500,15 @@ class _NotificationPageState extends State<NotificationPage> {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       decoration: BoxDecoration(
-        color: isUnread ? const Color(0xFFE7F3FF) : Colors.white,
+        color: isUnread
+            ? InternaCrystal.accentPurple.withOpacity(0.08)
+            : InternaCrystal.bgCard.withOpacity(0.6),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: isUnread
+              ? InternaCrystal.accentPurple.withOpacity(0.2)
+              : InternaCrystal.borderSubtle,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
@@ -549,26 +522,20 @@ class _NotificationPageState extends State<NotificationPage> {
             }
 
             if (notification.type == 'ANNOUNCEMENT') {
-              // Navigate to Announcement Tab
               final role =
                   getIt<AuthService>().currentUser?.role ?? UserRole.INTERN;
               if (role == UserRole.HR) {
-                getIt<MainCubit>().setIndex(
-                  4,
-                ); // HR: index 4 is AnnouncementPage
+                getIt<MainCubit>().setIndex(4);
               } else if (role == UserRole.MANAGER) {
-                // Manager doesn't have announcement tab currently,
-                // but let's assume they should go to notifications or we'll add it later.
-                // For now, if no tab, just stay here or pop.
+                // Manager doesn't have announcement tab
               } else {
-                // INTERN/EMPLOYEE: index 4 is AnnouncementPage
                 getIt<MainCubit>().setIndex(4);
               }
             } else {
               if (isManagerOrHR) {
                 context.router.push(const ManagerRequestRoute());
               } else {
-                getIt<MainCubit>().setIndex(2); // Schedule
+                getIt<MainCubit>().setIndex(2);
                 context.router.popUntilRoot();
               }
             }
@@ -579,16 +546,16 @@ class _NotificationPageState extends State<NotificationPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 46,
-                  height: 46,
+                  width: 42,
+                  height: 42,
                   decoration: BoxDecoration(
-                    color: _getIconColor(notification.type).withOpacity(0.12),
+                    color: _getIconColor(notification.type).withOpacity(0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     _getIcon(notification.type),
                     color: _getIconColor(notification.type),
-                    size: 22,
+                    size: 20,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -598,35 +565,31 @@ class _NotificationPageState extends State<NotificationPage> {
                     children: [
                       Text(
                         notification.title,
-                        style: TextStyle(
-                          fontWeight: isUnread
-                              ? FontWeight.bold
-                              : FontWeight.w600,
-                          fontSize: 18,
-                          color: Colors.black87,
+                        style: GoogleFonts.inter(
+                          fontWeight: isUnread ? FontWeight.bold : FontWeight.w600,
+                          fontSize: 15,
+                          color: InternaCrystal.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 4),
                       Text(
                         notification.message,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey.shade600,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: InternaCrystal.textSecondary,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 6),
                       Text(
                         _formatTimeAgo(notification.createdAt),
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
                           color: isUnread
-                              ? const Color(0xFF8B5CF6)
-                              : Colors.grey.shade400,
-                          fontWeight: isUnread
-                              ? FontWeight.bold
-                              : FontWeight.normal,
+                              ? InternaCrystal.accentPurple
+                              : InternaCrystal.textMuted,
+                          fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                     ],
@@ -634,11 +597,11 @@ class _NotificationPageState extends State<NotificationPage> {
                 ),
                 if (isUnread)
                   Container(
-                    width: 10,
-                    height: 10,
+                    width: 8,
+                    height: 8,
                     margin: const EdgeInsets.only(top: 6),
                     decoration: const BoxDecoration(
-                      color: Color(0xFF1877F2),
+                      color: InternaCrystal.accentPurple,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -688,15 +651,15 @@ class _NotificationPageState extends State<NotificationPage> {
   Color _getIconColor(String type) {
     switch (type) {
       case 'REQUEST_CREATED':
-        return const Color(0xFF8B5CF6);
+        return InternaCrystal.accentPurple;
       case 'REQUEST_APPROVED':
-        return Colors.green;
+        return InternaCrystal.accentGreen;
       case 'REQUEST_REJECTED':
-        return Colors.red;
+        return InternaCrystal.accentRed;
       case 'ANNOUNCEMENT':
-        return const Color(0xFF8B5CF6);
+        return InternaCrystal.accentPurple;
       default:
-        return Colors.grey;
+        return InternaCrystal.textMuted;
     }
   }
 }
